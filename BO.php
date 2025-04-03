@@ -13,3 +13,6 @@ public function authenticate(string $username, string $password): bool
 // Lógica de autenticación...
 return true;
 }
+
+
+
