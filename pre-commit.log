@@ -1,0 +1,30 @@
+El pre-commit se está ejecutando correctamente
+El pre-commit se está ejecutando correctamente
+El pre-commit se está ejecutando correctamente
+Ejecutando validación de PHP_CodeSniffer...
+Archivos detectados en staging: 
+No hay archivos PHP modificados.
+Ejecutando validación de PHP_CodeSniffer...
+Archivos detectados en staging: BO.php
+ERROR: Referenced sniff "Generic.Commenting.MissingDocComment" does not exist.
+
+Run "phpcs --help" for usage information
+Error: PHP_CodeSniffer detectó problemas.
+Ejecutando validación de PHP_CodeSniffer...
+Archivos detectados en staging: BO.php
+ERROR: Referenced sniff "Generic.Commenting.MissingDocComment" does not exist.
+
+Run "phpcs --help" for usage information
+Error: PHP_CodeSniffer detectó problemas.
+Ejecutando validación de PHP_CodeSniffer...
+Archivos detectados en staging: BO.php
+ERROR: Referenced sniff "Generic.Commenting.MissingDocComment" does not exist.
+
+Run "phpcs --help" for usage information
+Error: PHP_CodeSniffer detectó problemas.
+Ejecutando validación de PHP_CodeSniffer...
+Archivos detectados en staging: BO.php
+ERROR: Referenced sniff "Generic.Commenting.MissingDocComment" does not exist.
+
+Run "phpcs --help" for usage information
+Error: PHP_CodeSniffer detectó problemas.
