@@ -1,10 +1,10 @@
 <?php
 
 /**
- * Clase de ejemplo para prueba de validación PHPDoc.
+ * Clase de ejemplo para validación PHPDoc con PHP 8.2.
  *
- * @category Demo
- * @package  BOExample
+ * @category Ejemplo
+ * @package  BOEjemplo
  * @author   Ronald Pelaez
  * @version  1.0
  * @since    Archivo creado el 2025-04-04
@@ -16,7 +16,7 @@ class BO
      *
      * @var string
      */
-    private string $nombre;
+    private $nombre;
 
     /**
      * Constructor de la clase BO.
@@ -29,11 +29,11 @@ class BO
     }
 
     /**
-     * Obtiene el nombre de la persona.
+     * Devuelve el nombre de la persona.
      *
-     * @return string Retorna el nombre.
+     * @return string El nombre almacenado.
      */
-    public function getNombre(): string
+    public function getNombre()
     {
         return $this->nombre;
     }
