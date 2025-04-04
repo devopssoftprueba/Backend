@@ -1,42 +1,23 @@
 <?php
 
-/**
- * Clase de ejemplo para validar PHPDoc correctamente.
- *
- * @category Ejemplo
- * @package  DocumentacionValida
- * @author   Ronald Pelaez
- * @version  1.0
- * @since    Archivo disponible desde la versión 1.0
- */
-class EjemploCorrecto
-{
-    /**
-     * Nombre del usuario.
-     *
-     * @var string
-     */
-    private $nombre;
+class Usuario {
+
+    // Falta el comentario PHPDoc para la propiedad
+    public $nombre;
 
     /**
-     * Constructor de la clase.
-     *
-     * @param string $nombre Nombre del usuario.
+     * Método para obtener el nombre del usuario
+     * Falta @return string
      */
-    public function __construct($nombre)
-    {
-        $this->nombre = $nombre;
-    }
-
-    /**
-     * Obtiene el nombre del usuario.
-     *
-     * @return string Nombre del usuario.
-     */
-    public function obtenerNombre()
-    {
+    public function getNombre() {
         return $this->nombre;
     }
+
+    /**
+     * Falta la descripción del método
+     * @param string $nombre
+     */
+    public function setNombre($nombre) {
+        $this->nombre = $nombre;
+    }
 }
-
-
