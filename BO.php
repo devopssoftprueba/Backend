@@ -6,7 +6,7 @@ class Usuario {
     public $nombre;
 
     /**
-     * Método para obtener el nombre del usuario
+     * Metodo para obtener el nombre del usuario
      * Falta @return string
      */
     public function getNombre() {
