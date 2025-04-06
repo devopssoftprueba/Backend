@@ -1,0 +1,33 @@
+#!/bin/sh
+
+echo "🔍 Ejecutando validación PHPDoc con PHPCS..."
+
+# Obtener archivos PHP modificados (comparando contra el último commit en remoto)
+FILES=$(git diff --cached --name-only origin/$(git rev-parse --abbrev-ref HEAD) | grep -E '\.php$')
+
+# Si no hay archivos PHP modificados, no hacemos nada
+if [ -z "$FILES" ]; then
+  echo "✅ No hay archivos PHP modificados para validar."
+  exit 0
+fi
+
+# Flag de errores
+ERROR=0
+
+# Verificar cada archivo PHP modificado con los sniffs específicos
+for FILE in $FILES; do
+  echo "📂 Validando $FILE ..."
+  vendor/bin/phpcs --sniffs=Squiz.Commenting.FunctionComment,Squiz.Commenting.VariableComment,Generic.Commenting.DocComment "$FILE"
+  if [ $? -ne 0 ]; then
+    ERROR=1
+  fi
+done
+
+# Si hay errores, cancelar el push
+if [ $ERROR -ne 0 ]; then
+  echo "❌ Se encontraron errores en la documentación PHPDoc. Corrige antes de hacer push."
+  exit 1
+fi
+
+echo "✅ Validación exitosa. Continuando con el push."
+exit 0

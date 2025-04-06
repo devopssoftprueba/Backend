@@ -14,7 +14,7 @@ class BO
     /**
      * Nombre de la persona.
      *
-     * @var string
+     * @var int
      */
     private $nombre;
 
