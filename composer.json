@@ -1,19 +1,19 @@
 {
     "require-dev": {
-        "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
-        "phpcompatibility/php-compatibility": "^9.3",
-        "squizlabs/php_codesniffer": "^3.12"
+        "squizlabs/php_codesniffer": "^3.12",
+        "phpcompatibility/php-compatibility": "^9.3"
     },
     "config": {
         "platform": {
             "php": "8.2.12"
-        },
-        "allow-plugins": {
-            "dealerdirect/phpcodesniffer-composer-installer": true
         }
     },
     "scripts": {
-        "pre-commit": "php -r \"file_exists('.git/hooks/pre-commit') || touch('.git/hooks/pre-commit'); chmod .git/hooks/pre-commit\"",
-        "pre-push": "php -r \"file_exists('.git/hooks/pre-push') || touch('.git/hooks/pre-push'); chmod .git/hooks/pre-push\""
+        "post-install-cmd": [
+            "@php -r \"if (!is_dir('.git/hooks')) { echo 'No se encontró la carpeta .git/hooks. ¿Estás en un repositorio Git?'; exit(1); } copy('githooks/pre-push', '.git/hooks/pre-push');\""
+        ],
+        "post-update-cmd": [
+            "@php -r \"if (!is_dir('.git/hooks')) { echo 'No se encontró la carpeta .git/hooks. ¿Estás en un repositorio Git?'; exit(1); } copy('githooks/pre-push', '.git/hooks/pre-push');\""
+        ]
     }
 }
