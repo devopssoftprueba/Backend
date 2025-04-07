@@ -13,6 +13,7 @@
 require_once 'database.php';
 
 /**
+ * obtiene la lista de productos desde la base de datos.
  * @var PDO $pdo Conexión PDO a la base de datos.
  */
 global $pdo;
