@@ -1,0 +1,9 @@
+# Ignorar archivos de Composer
+/vendor/
+
+.idea
+composer.lock
+/var/
+/logs/
+.DS_Store    # Para MacOS
+Thumbs.db    # Para Windows
