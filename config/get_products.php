@@ -1,24 +1,19 @@
 <?php
 
-/**
- * Obtiene los productos desde la base de datos.
- *
- * @category Endpoint
- * @package  Product
- * @author   Ronald Pelaez
- * @version  1.0.0
- * @since    1.0.0
- */
-
 require_once 'database.php';
 
 /**
- * obtiene la lista de productos desde la base de datos.
- * @var PDO $pdo Conexión PDO a la base de datos.
+ * Get products from the database.
+ *
+ * Retrieves a list of products including ID, name, and price.
+ *
+ * @param PDO $pdo The PDO connection to the database.
+ * @return array The list of products retrieved from the database.
  */
-global $pdo;
+function getProducts(PDO $pdo): array
+{
+    $stmt = $pdo->prepare('SELECT id, name, price FROM products');
+    $stmt->execute();
 
-$stmt = $pdo->query("SELECT * FROM products");
-$products = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-echo json_encode($products);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
