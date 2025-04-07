@@ -1,23 +1,17 @@
 <?php
 
+/**
+ * Recupera todos los productos desde la base de datos.
+ *
+ * Este archivo realiza una consulta a la tabla `products` y retorna un JSON con los resultados.
+ */
+
 declare(strict_types=1);
 
-require_once 'database.php';
+$pdo = require __DIR__ . '/database.php';
 
-/**
- * Retrieves a list of products including ID, name, and price.
- *
- * This function executes a query on the "products" table and fetches all rows
- * using associative array format.
- *
- * @param  PDO   $pdo  The PDO connection to the database.
- *
- * @return array       The list of products retrieved from the database.
- */
-function getProducts(PDO $pdo): array
-{
-    $stmt = $pdo->prepare('SELECT id, name, price FROM products');
-    $stmt->execute();
+$stmt = $pdo->query(/** @lang SQL */ 'SELECT id, name, price FROM products');
+$products = $stmt->fetchAll();
 
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
+header('Content-Type: application/json');
+echo json_encode($products);

@@ -5,27 +5,32 @@ namespace Controllers;
 use Models\Product;
 
 /**
- * Controlador para manejar productos.
+ * Controlador de productos.
  *
- * @category Controller
- * @package  ProductController
- * @author   Ronald Pelaez
- * @version  1.0.0
- * @since    1.0.0
+ * Maneja la lógica de negocio relacionada con los productos.
+ *
+ * @category Controllers
+ * @package  Controllers
  */
 class ProductController
 {
     /**
-     * Obtiene todos los productos.
+     * Muestra una lista de productos.
      *
-     * @return Product[] Lista de productos.
+     * @return void
      */
-    public function getAllProducts(): array
+    public function index(): void
     {
-        // Simulación de productos
-        return [
-            new Product(1, 'Producto A', 10.99),
-            new Product(2, 'Producto B', 20.50),
+        $products = [
+            new Product(1, 'Producto A', 10.5),
+            new Product(2, 'Producto B', 20.0),
         ];
+
+        header('Content-Type: application/json');
+        echo json_encode(array_map(fn($p) => [
+            'id'    => $p->getId(),
+            'name'  => $p->getName(),
+            'price' => $p->getPrice()
+        ], $products));
     }
 }

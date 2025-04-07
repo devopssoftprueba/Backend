@@ -1,30 +1,28 @@
 <?php
 
 /**
- * Conexión a la base de datos.
+ * Configuración de la conexión a la base de datos.
  *
- * @category Config
- * @package  Database
- * @author   Ronald Pelaez
- * @version  1.0.0
- * @since    1.0.0
+ * Este archivo establece y retorna una instancia de PDO para interactuar con la base de datos.
  */
 
+declare(strict_types=1);
+
 $host = 'localhost';
-$db   = 'nombre_de_la_base_de_datos';
+$db   = 'nombre_de_tu_base_de_datos';
 $user = 'usuario';
 $pass = 'contraseña';
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+$options = [
+    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    PDO::ATTR_EMULATE_PREPARES   => false,
+];
 
 try {
-    /**
-     * Objeto PDO para la conexión.
-     *
-     * @return void
-     */
-    $pdo = new PDO($dsn, $user, $pass);
+    return new PDO($dsn, $user, $pass, $options);
 } catch (PDOException $e) {
-    echo 'Error de conexión: ' . $e->getMessage();
+    throw new PDOException($e->getMessage(), (int) $e->getCode());
 }

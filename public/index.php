@@ -1,13 +1,16 @@
 <?php
 
 /**
- * Punto de entrada principal del sistema.
+ * Punto de entrada principal para la aplicación.
  *
- * @category Public
- * @package  Index
- * @author   Ronald Pelaez
- * @version  1.0.0
- * @since    1.0.0
+ * Este archivo enruta las peticiones al controlador correspondiente.
  */
 
-echo "API activa";
+declare(strict_types=1);
+
+require_once __DIR__ . '/../src/controllers/ProductController.php';
+
+use Controllers\ProductController;
+
+$controller = new ProductController();
+$controller->index();
