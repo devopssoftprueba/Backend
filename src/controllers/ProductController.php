@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Controllers;
 
 use Models\Product;
+use PDO;
+use PDOException;
 
 /**
- * Controlador de productos.
- *
- * Maneja la lógica de negocio relacionada con los productos.
+ * Controlador para gestionar productos.
  *
  * @category Controllers
  * @package  Controllers
@@ -15,22 +17,26 @@ use Models\Product;
 class ProductController
 {
     /**
-     * Muestra una lista de productos.
+     * Obtiene una lista de productos desde la base de datos.
      *
-     * @return void
+     * @param PDO $pdo Conexión PDO a la base de datos.
+     *
+     * @return array Arreglo de productos.
      */
-    public function index(): void
+    public function getProducts(PDO $pdo): array
     {
-        $products = [
-            new Product(1, 'Producto A', 10.5),
-            new Product(2, 'Producto B', 20.0),
-        ];
+        try {
+            $stmt = $pdo->query(/** @lang text */ 'SELECT id, name, price FROM products');
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        header('Content-Type: application/json');
-        echo json_encode(array_map(fn($p) => [
-            'id'    => $p->getId(),
-            'name'  => $p->getName(),
-            'price' => $p->getPrice()
-        ], $products));
+            $products = [];
+            foreach ($result as $row) {
+                $products[] = new Product((int) $row['id'], $row['name'], (float) $row['price']);
+            }
+
+            return $products;
+        } catch (PDOException $e) {
+            return [];
+        }
     }
 }
