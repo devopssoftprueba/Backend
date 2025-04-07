@@ -21,7 +21,7 @@ class BO
     /**
      * Constructor de la clase BO.
      *
-     * @param int $nombre Nombre de la persona.
+     * @param string $nombre Nombre de la persona.
      */
     public function __construct(string $nombre)
     {
