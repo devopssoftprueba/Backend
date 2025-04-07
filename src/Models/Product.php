@@ -3,20 +3,15 @@
 namespace Models;
 
 /**
- * Class Product
- *
- * Representa un producto del catálogo.
+ * Clase Product que representa un producto del sistema.
  *
  * @category Models
  * @package  Models
- * @author   Ronald Pelaez
- * @version  1.0.0
- * @since    2025-04-06
  */
 class Product
 {
     /**
-     * Identificador del producto.
+     * ID del producto.
      *
      * @var integer
      */
@@ -37,32 +32,46 @@ class Product
     private float $price;
 
     /**
-     * Establece los datos del producto.
+     * Constructor de la clase Product.
      *
-     * @param integer $id    ID del producto.
-     * @param string  $name  Nombre del producto.
-     * @param float   $price Precio del producto.
-     *
-     * @return void
+     * @param integer    $id    Identificador del producto.
+     * @param string $name  Nombre del producto.
+     * @param float  $price Precio del producto.
      */
-    public function setProductData(int $id, string $name, float $price): void
+    public function __construct(int $id, string $name, float $price)
     {
-        $this->id = $id;
-        $this->name = $name;
+        $this->id    = $id;
+        $this->name  = $name;
         $this->price = $price;
     }
 
     /**
-     * Obtiene los datos del producto.
+     * Obtiene el ID del producto.
      *
-     * @return array Arreglo con ID, nombre y precio.
+     * @return integer ID del producto.
      */
-    public function getProductData(): array
+    public function getId(): int
     {
-        return [
-            'id'    => $this->id,
-            'name'  => $this->name,
-            'price' => $this->price,
-        ];
+        return $this->id;
+    }
+
+    /**
+     * Obtiene el nombre del producto.
+     *
+     * @return string Nombre del producto.
+     */
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    /**
+     * Obtiene el precio del producto.
+     *
+     * @return float Precio del producto.
+     */
+    public function getPrice(): float
+    {
+        return $this->price;
     }
 }
