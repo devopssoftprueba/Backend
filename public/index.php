@@ -1,15 +1,13 @@
 <?php
-declare(strict_types=1);
 
 /**
- * Punto de entrada del backend
+ * Punto de entrada principal del sistema.
  *
- * @package VirtualStore\Public
- * @author Ronald
- * @version 1.0
+ * @category Public
+ * @package  Index
+ * @author   Ronald Pelaez
+ * @version  1.0.0
+ * @since    1.0.0
  */
 
-require_once __DIR__ . '/../src/controllers/ProductController.php';
-
-$controller = new ProductController();
-$controller->index();
+echo "API activa";

@@ -1,24 +1,31 @@
 <?php
+
+namespace Controllers;
+
+use Models\Product;
+
 /**
- * Controlador de productos
+ * Controlador para manejar productos.
  *
- * @package VirtualStore\Controllers
- * @author Ronald
- * @version 1.1
+ * @category Controller
+ * @package  ProductController
+ * @author   Ronald Pelaez
+ * @version  1.0.0
+ * @since    1.0.0
  */
-
-require_once __DIR__ . '/../models/Product.php';
-
 class ProductController
 {
     /**
-     * Muestra los productos disponibles
+     * Obtiene todos los productos.
+     *
+     * @return Product[] Lista de productos.
      */
-    public function index()
+    public function getAllProducts(): array
     {
-        $product = new Product();
-        $products = $product->getAll();
-        header('Content-Type: application/json');
-        echo json_encode($products);
+        // Simulación de productos
+        return [
+            new Product(1, 'Producto A', 10.99),
+            new Product(2, 'Producto B', 20.50),
+        ];
     }
 }

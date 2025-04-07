@@ -1,24 +1,23 @@
 <?php
 
 /**
- * Endpoint para obtener la lista de productos de la tienda.
+ * Obtiene los productos desde la base de datos.
  *
- * @package Backend
- * @author Ronald
- * @version 1.0
- * @since 2025-04-06
+ * @category Endpoint
+ * @package  Product
+ * @author   Ronald Pelaez
+ * @version  1.0.0
+ * @since    1.0.0
  */
 
 require_once 'database.php';
 
-header('Content-Type: application/json');
+/**
+ * @var PDO $pdo Conexión PDO a la base de datos.
+ */
+global $pdo;
 
-$pdo = getPDO();
+$stmt = $pdo->query("SELECT * FROM products");
+$products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-try {
-    $stmt = $pdo->query("SELECT * FROM products");
-    $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    echo json_encode($products);
-} catch (PDOException $e) {
-    echo json_encode(['error' => $e->getMessage()]);
-}
+echo json_encode($products);

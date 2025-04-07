@@ -1,26 +1,30 @@
 <?php
 
 /**
- * Archivo de conexión a la base de datos MySQL.
+ * Conexión a la base de datos.
  *
- * @package Backend
- * @author Ronald
- * @version 1.0
- * @since 2025-04-06
+ * @category Config
+ * @package  Database
+ * @author   Ronald Pelaez
+ * @version  1.0.0
+ * @since    1.0.0
  */
 
-function getPDO(): PDO
-{
-    $host = 'localhost';
-    $dbname = 'virtualstore';
-    $user = 'root';
-    $password = ''; // Sin contraseña en XAMPP por defecto
+$host = 'localhost';
+$db   = 'nombre_de_la_base_de_datos';
+$user = 'usuario';
+$pass = 'contraseña';
+$charset = 'utf8mb4';
 
-    try {
-        $pdo = new PDO("mysql:host=$host;dbname=$dbname", $user, $password);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        return $pdo;
-    } catch (PDOException $e) {
-        die("❌ Error al conectar a la base de datos: " . $e->getMessage());
-    }
+$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+
+try {
+    /**
+     * Objeto PDO para la conexión.
+     *
+     * @return void
+     */
+    $pdo = new PDO($dsn, $user, $pass);
+} catch (PDOException $e) {
+    echo 'Error de conexión: ' . $e->getMessage();
 }
