@@ -1,25 +1,68 @@
 <?php
+
+namespace Models;
+
 /**
- * Modelo de Producto
+ * Class Product
  *
- * @package VirtualStore\Models
- * @author Ronald
- * @version 1.1
+ * Representa un producto del catálogo.
+ *
+ * @category Models
+ * @package  Models
+ * @author   Ronald Pelaez
+ * @version  1.0.0
+ * @since    2025-04-06
  */
-
-require_once __DIR__ . '/../../config/database.php';
-
 class Product
 {
     /**
-     * Devuelve todos los productos desde la base de datos
+     * Identificador del producto.
      *
-     * @return array
+     * @var integer
      */
-    public function getAll(): array
+    private int $id;
+
+    /**
+     * Nombre del producto.
+     *
+     * @var string
+     */
+    private string $name;
+
+    /**
+     * Precio del producto.
+     *
+     * @var float
+     */
+    private float $price;
+
+    /**
+     * Establece los datos del producto.
+     *
+     * @param integer $id    ID del producto.
+     * @param string  $name  Nombre del producto.
+     * @param float   $price Precio del producto.
+     *
+     * @return void
+     */
+    public function setProductData(int $id, string $name, float $price): void
     {
-        global $pdo;
-        $stmt = $pdo->query("SELECT * FROM products");
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $this->id = $id;
+        $this->name = $name;
+        $this->price = $price;
+    }
+
+    /**
+     * Obtiene los datos del producto.
+     *
+     * @return array Arreglo con ID, nombre y precio.
+     */
+    public function getProductData(): array
+    {
+        return [
+            'id'    => $this->id,
+            'name'  => $this->name,
+            'price' => $this->price,
+        ];
     }
 }

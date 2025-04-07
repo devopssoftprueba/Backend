@@ -14,12 +14,16 @@ fi
 # Flag de errores
 ERROR=0
 
-# Verificar cada archivo PHP modificado con los sniffs específicos
+# Verificar cada archivo PHP modificado que realmente exista
 for FILE in $FILES; do
-  echo "📂 Validando $FILE ..."
-  vendor/bin/phpcs --sniffs=Squiz.Commenting.FunctionComment,Squiz.Commenting.VariableComment,Generic.Commenting.DocComment "$FILE"
-  if [ $? -ne 0 ]; then
-    ERROR=1
+  if [ -f "$FILE" ]; then
+    echo "📂 Validando $FILE ..."
+    vendor/bin/phpcs --sniffs=Squiz.Commenting.FunctionComment,Squiz.Commenting.VariableComment,Generic.Commenting.DocComment "$FILE"
+    if [ $? -ne 0 ]; then
+      ERROR=1
+    fi
+  else
+    echo "⚠️ Archivo omitido (no existe): $FILE"
   fi
 done
 
