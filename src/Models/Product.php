@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Models;
 
 /**
- * Clase Product que representa un producto del sistema.
+ * Clase que representa un producto.
  *
  * @category Models
  * @package  Models
@@ -34,44 +36,31 @@ class Product
     /**
      * Constructor de la clase Product.
      *
-     * @param integer    $id    Identificador del producto.
-     * @param string $name  Nombre del producto.
-     * @param float  $price Precio del producto.
+     * @param integer $id    ID del producto.
+     * @param string  $name  Nombre del producto.
+     * @param float   $price Precio del producto.
      */
-    public function __construct(int $id, string $name, float $price)
-    {
+    public function __construct(
+        int $id,
+        string $name,
+        float $price
+    ) {
         $this->id    = $id;
         $this->name  = $name;
         $this->price = $price;
     }
 
     /**
-     * Obtiene el ID del producto.
+     * Devuelve los datos del producto como arreglo.
      *
-     * @return integer ID del producto.
+     * @return array Arreglo con los datos del producto.
      */
-    public function getId(): int
+    public function toArray(): array
     {
-        return $this->id;
-    }
-
-    /**
-     * Obtiene el nombre del producto.
-     *
-     * @return string Nombre del producto.
-     */
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-    /**
-     * Obtiene el precio del producto.
-     *
-     * @return float Precio del producto.
-     */
-    public function getPrice(): float
-    {
-        return $this->price;
+        return [
+            'id'    => $this->id,
+            'name'  => $this->name,
+            'price' => $this->price,
+        ];
     }
 }
