@@ -21,7 +21,7 @@ class ProductController
      *
      * @param PDO $pdo Conexión PDO a la base de datos.
      *
-     * @return integer Arreglo de productos.
+     * @return array Arreglo de productos.
      */
     public function getProducts(PDO $pdo): array
     {
