@@ -5,12 +5,14 @@
 # Este hook pre-push:
 # 1. Detecta archivos PHP modificados.
 # 2. Corrige automáticamente la documentación PHPDoc.
-# 3. Ejecuta PHPCS para validar estilo y formato.
-# 4. Si hay errores tras la corrección, bloquea el push.
+# 3. Organiza la documentación según la plantilla establecida.
+# 4. Ejecuta PHPCS para validar estilo y formato.
+# 5. Si hay errores tras la corrección, bloquea el push.
 # --------------------------------------------------------------------
 
-echo "🔧 Iniciando proceso de corrección y validación PHPDoc..."
+echo "🔧 Iniciando proceso de corrección, organización y validación PHPDoc..."
 
+# Detectar archivos PHP modificados en staging
 FILES=$(git diff --cached --name-only origin/$(git rev-parse --abbrev-ref HEAD) | grep -E '\.php$')
 
 if [ -z "$FILES" ]; then
@@ -26,31 +28,38 @@ FILES_VALIDOS=()
 for FILE in $FILES; do
   if [ -f "$FILE" ]; then
     echo ""
-    echo "📂 Procesando: $FILE"
+    echo "📂 Procesando archivo: $FILE"
 
-    # Ejecutar el script de corrección de PHPDoc
+    # Ejecutar el script de corrección y organización PHPDoc
+    echo "📄 Ejecutando scripts de documentación automática en: $FILE"
     CORRECCION_OUTPUT=$(php scripts/run-doc-fixer.php "$FILE")
-    echo "🛠️ Resultado de corrección:"
+    echo "🛠️ Resultado de corrección automática:"
     echo "$CORRECCION_OUTPUT"
 
-    # Ejecutar PHPCBF para corregir errores simples automáticamente
-    php vendor/bin/phpcbf "$FILE"
+    # Ejecutar PHPCBF para corrección automática de estilo
+    echo "🔍 Ejecutando PHPCBF..."
+    PHPCBF_OUTPUT=$(php vendor/bin/phpcbf "$FILE")
+    echo "$PHPCBF_OUTPUT"
 
-    # Ejecutar PHPCS
+    # Validar con PHPCS
+    echo "✅ Ejecutando PHPCS..."
     PHPCS_OUTPUT=$(php vendor/bin/phpcs "$FILE")
     PHPCS_STATUS=$?
 
     if [ $PHPCS_STATUS -ne 0 ]; then
-      echo "❌ PHPCS detectó errores en $FILE"
+      echo "❌ PHPCS detectó errores en: $FILE"
       echo "$PHPCS_OUTPUT"
       FILES_CON_ERRORES+=("$FILE")
       ERROR=1
     else
-      echo "✅ $FILE validado correctamente con PHPCS"
-      # Si la corrección hizo cambios, agregamos a lista de corregidos
-      if echo "$CORRECCION_OUTPUT" | grep -q "corregida" || echo "$CORRECCION_OUTPUT" | grep -q "agregada"; then
+      echo "✅ PHPCS validó correctamente el archivo: $FILE"
+
+      # Detectar si se aplicaron correcciones o adiciones de documentación
+      if echo "$CORRECCION_OUTPUT" | grep -qE "corregida|agregada|organizada"; then
+        echo "📌 Documentación modificada o reestructurada en: $FILE"
         FILES_CORREGIDOS+=("$FILE")
       else
+        echo "📘 Archivo válido y sin necesidad de cambios: $FILE"
         FILES_VALIDOS+=("$FILE")
       fi
     fi
@@ -59,25 +68,27 @@ for FILE in $FILES; do
   fi
 done
 
-# 🧾 Log resumen
+# 🧾 Log resumen detallado
 echo ""
-echo "📋 Resumen de validación:"
+echo "📋 RESUMEN FINAL DEL PROCESO"
+echo "─────────────────────────────"
+
 if [ ${#FILES_CORREGIDOS[@]} -gt 0 ]; then
-  echo "🛠️ Archivos con correcciones aplicadas:"
+  echo "🛠️ Archivos con documentación corregida o organizada:"
   for f in "${FILES_CORREGIDOS[@]}"; do
     echo "   - $f"
   done
 fi
 
 if [ ${#FILES_VALIDOS[@]} -gt 0 ]; then
-  echo "✅ Archivos ya válidos (sin necesidad de corrección):"
+  echo "✅ Archivos válidos sin necesidad de modificación:"
   for f in "${FILES_VALIDOS[@]}"; do
     echo "   - $f"
   done
 fi
 
 if [ ${#FILES_CON_ERRORES[@]} -gt 0 ]; then
-  echo "❌ Archivos con errores que no pudieron ser corregidos completamente:"
+  echo "❌ Archivos con errores pendientes:"
   for f in "${FILES_CON_ERRORES[@]}"; do
     echo "   - $f"
   done
@@ -86,9 +97,9 @@ fi
 # Resultado final
 echo ""
 if [ $ERROR -ne 0 ]; then
-  echo "🚫 Push cancelado. Se detectaron errores que deben corregirse manualmente."
+  echo "🚫 Push cancelado. Debes corregir los errores antes de continuar."
   exit 1
 else
-  echo "🎉 Todo validado correctamente. Continuando con el push."
+  echo "🎉 Todo validado correctamente. Push permitido."
   exit 0
 fi

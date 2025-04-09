@@ -1,110 +1,125 @@
 <?php
 
 /**
- * Script: doc-fixer.php
- * Descripción: Corrige y genera automáticamente documentación PHPDoc en archivos PHP modificados.
- * Uso: Este script es llamado desde el hook pre-push y trabaja sobre los archivos modificados.
+ * Script para analizar y documentar automáticamente código PHP con PHPDoc
+ * conforme a una plantilla personalizada estricta para clases, métodos y propiedades.
+ *
+ * @author Ronald
+ * @since  2025-04-09
  */
 
-/**
- * Genera la documentación PHPDoc para una función.
- *
- * @param string $nombre  Nombre de la función.
- * @param array  $params  Lista de nombres de parámetros.
- * @param string $retorno Tipo de retorno de la función (por defecto: 'void').
- * @return string Retorna el bloque de documentación generado.
- */
-function generarDocFuncion(string $nombre, array $params, string $retorno = 'void'): string
-{
-    $doc = "/**\n";
-    $doc .= " * [Descripción pendiente por completar]\n";
-    foreach ($params as $param) {
-        $doc .= " * @param mixed \$$param Descripción del parámetro.\n";
-    }
-    $doc .= " * @return $retorno Descripción del valor retornado.\n";
-    $doc .= " */\n";
-    return $doc;
-}
+declare(strict_types=1);
 
 /**
- * Genera la documentación PHPDoc para una propiedad.
+ * Procesa todos los archivos PHP dentro del proyecto y les aplica documentación PHPDoc.
  *
- * @param string $nombre Nombre de la propiedad.
- * @return string Retorna el bloque de documentación generado.
- */
-function generarDocPropiedad(string $nombre): string
-{
-    return "/**\n * [Descripción de la propiedad]\n * @var mixed\n */\n";
-}
-
-/**
- * Genera la documentación PHPDoc para una clase.
- *
- * @param string $nombre Nombre de la clase.
- * @return string Retorna el bloque de documentación generado.
- */
-function generarDocClase(string $nombre): string
-{
-    return "/**\n * [Descripción de la clase $nombre]\n */\n";
-}
-
-/**
- * Procesa un archivo PHP para generar o corregir bloques de documentación PHPDoc.
- *
- * @param string $archivo Ruta del archivo a procesar.
  * @return void
  */
-function procesarArchivo(string $archivo): void
+function ejecutarDocFixer(): void
 {
-    if (!file_exists($archivo)) {
-        echo "⚠️ Archivo no encontrado: $archivo\n";
-        return;
-    }
+    $dir = __DIR__ . '/../'; // Ruta raíz del proyecto
+    $phpFiles = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir));
 
-    $contenido = file_get_contents($archivo);
-    $lineas = explode("\n", $contenido);
-    $nuevaSalida = [];
-    $i = 0;
-    $modificado = false;
-
-    while ($i < count($lineas)) {
-        $linea = $lineas[$i];
-
-        // Validar clase
-        if (preg_match('/^\s*(final\s+)?class\s+(\w+)/', $linea, $match)) {
-            if ($i === 0 || !preg_match('/\*\//', $lineas[$i - 1])) {
-                $nuevaSalida[] = generarDocClase($match[2]);
-                $modificado = true;
-            }
+    foreach ($phpFiles as $file) {
+        if ($file->getExtension() === 'php') {
+            processFile($file->getPathname());
         }
-
-        // Validar propiedad
-        if (preg_match('/^\s*(public|protected|private)\s+\$[\w]+[ ;=]/', $linea)) {
-            if ($i === 0 || !preg_match('/\*\//', $lineas[$i - 1])) {
-                $nuevaSalida[] = generarDocPropiedad('');
-                $modificado = true;
-            }
-        }
-
-        // Validar función
-        if (preg_match('/^\s*(public|protected|private)?\s*function\s+(\w+)\s*\((.*?)\)/', $linea, $match)) {
-            if ($i === 0 || !preg_match('/\*\//', $lineas[$i - 1])) {
-                $parametros = array_filter(array_map(function ($p) {
-                    return trim(preg_replace('/.*\$/', '', $p));
-                }, explode(',', $match[3])));
-                $nuevaSalida[] = generarDocFuncion($match[2], $parametros);
-                $modificado = true;
-            }
-        }
-
-        $nuevaSalida[] = $linea;
-        $i++;
     }
+}
 
-    if ($modificado) {
-        file_put_contents($archivo, implode("\n", $nuevaSalida));
-        echo "✅ Documentación corregida o agregada en: $archivo\n";
-    } else {
-        echo "✔️ Documentación ya válida en: $archivo\n";
-    }
+/**
+ * Procesa un archivo PHP y agrega la documentación PHPDoc
+ * a clases, propiedades y métodos si no la tienen.
+ *
+ * @param string $filePath Ruta del archivo a procesar.
+ *
+ * @return void
+ */
+function processFile(string $filePath): void
+{
+    $content = file_get_contents($filePath);
+
+    // Procesar clases
+    $content = preg_replace_callback(
+        '/(class\s+(\w+)\s*(?:extends\s+\w+)?\s*\{)/',
+        function ($matches) {
+            $className = $matches[2];
+            $fecha = date('Y-m-d');
+
+            $docBlock = <<<EOD
+/**
+ * Clase $className.
+ *
+ * Esta clase representa la entidad $className y contiene sus métodos y propiedades asociadas.
+ *
+ * @category   Utilidades
+ * @package    CustomModules
+ * @author     Desconocido
+ * @version    1.0.0
+ * @since      $fecha
+ */
+EOD;
+            return $docBlock . "\n" . $matches[0];
+        },
+        $content
+    );
+
+    // Procesar propiedades
+    $content = preg_replace_callback(
+        '/(private|protected|public)\s+\$([a-zA-Z0-9_]+)\s*;/',
+        function ($matches) {
+            $visibility = $matches[1];
+            $name = $matches[2];
+
+            return <<<EOD
+/**
+ * Propiedad \$$name.
+ *
+ * @var mixed Descripción no definida.
+ */
+$visibility \$$name;
+EOD;
+        },
+        $content
+    );
+
+    // Procesar métodos
+    $content = preg_replace_callback(
+        '/(public|protected|private)\s+function\s+(\w+)\s*\(([^)]*)\)(\s*:\s*\??\w+)?\s*\{/',
+        function ($matches) {
+            $visibility = $matches[1];
+            $name = $matches[2];
+            $params = trim($matches[3]);
+            $returnType = $matches[4] ?? '';
+            $paramLines = '';
+
+            if ($params !== '') {
+                $paramsArray = explode(',', $params);
+                foreach ($paramsArray as $param) {
+                    preg_match('/(\??\w+)?\s*\$([\w_]+)/', trim($param), $pMatch);
+                    $type = $pMatch[1] ?? 'mixed';
+                    $pname = $pMatch[2] ?? 'param';
+                    $paramLines .= " * @param $type \$$pname Descripción del parámetro.\n";
+                }
+            }
+
+            $return = 'void';
+            if (trim($returnType)) {
+                $return = str_replace([':', '?'], '', trim($returnType));
+            }
+
+            return <<<EOD
+/**
+ * Método $name.
+ *
+ * Descripción del método $name.
+$paramLines * @return $return Descripción del valor retornado.
+ */
+$visibility function $name($params)$returnType {
+EOD;
+        },
+        $content
+    );
+
+    file_put_contents($filePath, $content);
 }
