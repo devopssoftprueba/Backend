@@ -5,6 +5,14 @@
  * Uso: Este script es llamado desde el hook pre-push y trabaja sobre los archivos modificados.
  */
 
+/**
+ * [Descripción pendiente por completar]
+ * @param mixed $nombre
+ * @param mixed $params
+ * @param mixed $retorno = 'void'
+ * @return void
+ */
+
 function generarDocFuncion($nombre, $params, $retorno = 'void') {
     $doc = "/**\n";
     $doc .= " * [Descripción pendiente por completar]\n";
@@ -16,13 +24,31 @@ function generarDocFuncion($nombre, $params, $retorno = 'void') {
     return $doc;
 }
 
+/**
+ * [Descripción pendiente por completar]
+ * @param mixed $nombre
+ * @return void
+ */
+
 function generarDocPropiedad($nombre) {
     return "/**\n * [Descripción de la propiedad]\n * @var mixed\n */\n";
 }
 
+/**
+ * [Descripción pendiente por completar]
+ * @param mixed $nombre
+ * @return void
+ */
+
 function generarDocClase($nombre) {
     return "/**\n * [Descripción de la clase $nombre]\n */\n";
 }
+
+/**
+ * [Descripción pendiente por completar]
+ * @param mixed $archivo
+ * @return void
+ */
 
 function procesarArchivo($archivo) {
     if (!file_exists($archivo)) {

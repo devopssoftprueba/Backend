@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # --------------------------------------------------------------------
 # Validación y corrección automática de documentación PHPDoc.
@@ -33,8 +33,11 @@ for FILE in $FILES; do
     echo "🛠️ Resultado de corrección:"
     echo "$CORRECCION_OUTPUT"
 
+    # Ejecutar PHPCBF para corregir errores simples automáticamente
+    php vendor/bin/phpcbf "$FILE"
+
     # Ejecutar PHPCS
-    PHPCS_OUTPUT=$(vendor/bin/phpcs "$FILE")
+    PHPCS_OUTPUT=$(php vendor/bin/phpcs "$FILE")
     PHPCS_STATUS=$?
 
     if [ $PHPCS_STATUS -ne 0 ]; then
