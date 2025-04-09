@@ -1,37 +1,91 @@
 #!/bin/sh
 
-echo "🔍 Ejecutando validación PHPDoc con PHPCS..."
+# --------------------------------------------------------------------
+# Validación y corrección automática de documentación PHPDoc.
+# Este hook pre-push:
+# 1. Detecta archivos PHP modificados.
+# 2. Corrige automáticamente la documentación PHPDoc.
+# 3. Ejecuta PHPCS para validar estilo y formato.
+# 4. Si hay errores tras la corrección, bloquea el push.
+# --------------------------------------------------------------------
 
-# Obtener archivos PHP modificados (comparando contra el último commit en remoto)
+echo "🔧 Iniciando proceso de corrección y validación PHPDoc..."
+
 FILES=$(git diff --cached --name-only origin/$(git rev-parse --abbrev-ref HEAD) | grep -E '\.php$')
 
-# Si no hay archivos PHP modificados, no hacemos nada
 if [ -z "$FILES" ]; then
   echo "✅ No hay archivos PHP modificados para validar."
   exit 0
 fi
 
-# Flag de errores
 ERROR=0
+FILES_CORREGIDOS=()
+FILES_CON_ERRORES=()
+FILES_VALIDOS=()
 
-# Verificar cada archivo PHP modificado que realmente exista
 for FILE in $FILES; do
   if [ -f "$FILE" ]; then
-    echo "📂 Validando $FILE ..."
-    vendor/bin/phpcs --sniffs=Squiz.Commenting.FunctionComment,Squiz.Commenting.VariableComment,Generic.Commenting.DocComment "$FILE"
-    if [ $? -ne 0 ]; then
+    echo ""
+    echo "📂 Procesando: $FILE"
+
+    # Ejecutar el script de corrección de PHPDoc
+    CORRECCION_OUTPUT=$(php scripts/doc-fixer.php "$FILE")
+    echo "🛠️ Resultado de corrección:"
+    echo "$CORRECCION_OUTPUT"
+
+    # Ejecutar PHPCS
+    PHPCS_OUTPUT=$(vendor/bin/phpcs "$FILE")
+    PHPCS_STATUS=$?
+
+    if [ $PHPCS_STATUS -ne 0 ]; then
+      echo "❌ PHPCS detectó errores en $FILE"
+      echo "$PHPCS_OUTPUT"
+      FILES_CON_ERRORES+=("$FILE")
       ERROR=1
+    else
+      echo "✅ $FILE validado correctamente con PHPCS"
+      # Si la corrección hizo cambios, agregamos a lista de corregidos
+      if echo "$CORRECCION_OUTPUT" | grep -q "corregida" || echo "$CORRECCION_OUTPUT" | grep -q "agregada"; then
+        FILES_CORREGIDOS+=("$FILE")
+      else
+        FILES_VALIDOS+=("$FILE")
+      fi
     fi
   else
     echo "⚠️ Archivo omitido (no existe): $FILE"
   fi
 done
 
-# Si hay errores, cancelar el push
-if [ $ERROR -ne 0 ]; then
-  echo "❌ Se encontraron errores en la documentación PHPDoc. Corrige antes de hacer push."
-  exit 1
+# 🧾 Log resumen
+echo ""
+echo "📋 Resumen de validación:"
+if [ ${#FILES_CORREGIDOS[@]} -gt 0 ]; then
+  echo "🛠️ Archivos con correcciones aplicadas:"
+  for f in "${FILES_CORREGIDOS[@]}"; do
+    echo "   - $f"
+  done
 fi
 
-echo "✅ Validación exitosa. Continuando con el push."
-exit 0
+if [ ${#FILES_VALIDOS[@]} -gt 0 ]; then
+  echo "✅ Archivos ya válidos (sin necesidad de corrección):"
+  for f in "${FILES_VALIDOS[@]}"; do
+    echo "   - $f"
+  done
+fi
+
+if [ ${#FILES_CON_ERRORES[@]} -gt 0 ]; then
+  echo "❌ Archivos con errores que no pudieron ser corregidos completamente:"
+  for f in "${FILES_CON_ERRORES[@]}"; do
+    echo "   - $f"
+  done
+fi
+
+# Resultado final
+echo ""
+if [ $ERROR -ne 0 ]; then
+  echo "🚫 Push cancelado. Se detectaron errores que deben corregirse manualmente."
+  exit 1
+else
+  echo "🎉 Todo validado correctamente. Continuando con el push."
+  exit 0
+fi

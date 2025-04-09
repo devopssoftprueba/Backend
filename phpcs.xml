@@ -1,26 +1,81 @@
 <?xml version="1.0"?>
-<ruleset name="ModernPHPStandard">
-    <description>Modern PHP_CodeSniffer ruleset for PHP 8+</description>
+<!-- Archivo de configuración para PHP_CodeSniffer personalizado para validar la documentación en PHP V8 con PHPdocs-->
 
-    <!-- Reglas principales -->
+<ruleset name="ModernPHPStandard">
+    <!-- Descripción general del conjunto de reglas -->
+    <description>Reglas personalizadas para validar la documentacion con PHP_CodeSniffer en formato PHPdocs</description>
+
+    <!-- ============================= -->
+    <!-- Reglas ACTIVAS en el análisis -->
+    <!-- ============================= -->
+
+    <!-- Activa el estándar PSR-12, recomendado para código moderno en PHP -->
     <rule ref="PSR12" />
+
+    <!-- Verifica que todas las funciones tengan comentarios PHPDoc adecuados -->
     <rule ref="Squiz.Commenting.FunctionComment" />
+
+    <!-- Requiere comentarios para las variables, especialmente si su propósito no es evidente -->
     <rule ref="Squiz.Commenting.VariableComment" />
+
+    <!-- Valida que los bloques PHPDoc estén bien estructurados y correctamente posicionados -->
     <rule ref="Generic.Commenting.DocComment" />
 
-    <!-- Excluir reglas antiguas u obsoletas -->
+    <!-- =============================================== -->
+    <!-- Reglas que se EXCLUYEN del análisis por motivos -->
+    <!-- de compatibilidad o flexibilidad del proyecto   -->
+    <!-- =============================================== -->
+
+    <!-- Permite etiquetas personalizadas en comentarios de clases -->
     <exclude name="Squiz.Commenting.ClassComment.TagNotAllowed" />
+
+    <!-- Permite diferentes tipos de salto de línea (CRLF vs LF), útil en Windows -->
     <exclude name="Generic.Files.LineEndings.InvalidEOLChar" />
+
+    <!-- No obliga a escribir funciones nativas de PHP en minúscula -->
     <exclude name="Squiz.PHP.LowercasePHPFunctions" />
+
+    <!-- Permite que las líneas excedan el límite estándar de longitud -->
     <exclude name="Generic.Files.LineLength.TooLong" />
+
+    <!-- Permite variables privadas sin guion bajo al inicio -->
     <exclude name="Squiz.NamingConventions.ValidVariableName.PrivateNoUnderscore" />
+
+    <!-- Permite que el nombre del archivo no coincida exactamente con el nombre de la clase -->
     <exclude name="Squiz.Classes.ClassFileName.NoMatch" />
+
+    <!-- No requiere que cada archivo tenga un bloque de comentario PHPDoc al inicio -->
     <exclude name="Squiz.Commenting.FileComment.Missing" />
+
+    <!-- Permite múltiples clases dentro de un mismo archivo -->
     <exclude name="Generic.Files.OneClassPerFile.MultipleFound" />
     <exclude name="Generic.Files.OneClassPerFile.ClassesPerFile" />
 
-    <!-- Configuración -->
+    <!-- ========================== -->
+    <!-- Configuración adicional    -->
+    <!-- ========================== -->
+
+    <!-- Define la raíz del proyecto como punto de análisis -->
     <arg name="basepath" value="."/>
+
+    <!-- Indica que se está utilizando PHP 8.2.0 (para soportar nuevas sintaxis y características) -->
     <config name="php_version" value="80200"/>
+
+    <!-- Establece que cada tabulación equivale a 4 espacios -->
     <arg name="tab-width" value="4"/>
 </ruleset>
+        <!--
+            Este archivo define un conjunto de reglas personalizadas para PHP_CodeSniffer (PHPCS),
+            utilizado para validar el estilo de código PHP y la documentación PHPDoc según los
+            estándares PSR-12 y reglas específicas del proyecto.
+
+            En particular, se enfoca en validar que las funciones, variables y estructuras
+            estén documentadas correctamente, excluyendo ciertas reglas que no se ajustan
+            a los requerimientos del equipo.
+
+            El formato XML (eXtensible Markup Language) se utiliza aquí como lenguaje de marcado
+            para estructurar estas reglas de manera jerárquica, legible y compatible con herramientas
+            automatizadas como PHPCS.
+
+            Este archivo no ejecuta código, solo actúa como guía de configuración para el analizador.
+        -->
