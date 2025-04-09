@@ -29,7 +29,7 @@ for FILE in $FILES; do
     echo "📂 Procesando: $FILE"
 
     # Ejecutar el script de corrección de PHPDoc
-    CORRECCION_OUTPUT=$(php scripts/doc-fixer.php "$FILE")
+    CORRECCION_OUTPUT=$(php scripts/run-doc-fixer.php "$FILE")
     echo "🛠️ Resultado de corrección:"
     echo "$CORRECCION_OUTPUT"
 

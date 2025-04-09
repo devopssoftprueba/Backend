@@ -37,7 +37,7 @@ class Product
      * Constructor de la clase Product.
      *
      * @param integer $id    ID del producto.
-     * @param integer  $name  Nombre del producto.
+     * @param integer $name  Nombre del producto.
      * @param float   $price Precio del producto.
      */
     public function __construct(

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Script: doc-fixer.php
  * Descripción: Corrige y genera automáticamente documentación PHPDoc en archivos PHP modificados.
@@ -6,51 +7,55 @@
  */
 
 /**
- * [Descripción pendiente por completar]
- * @param mixed $nombre
- * @param mixed $params
- * @param mixed $retorno = 'void'
- * @return void
+ * Genera la documentación PHPDoc para una función.
+ *
+ * @param string $nombre  Nombre de la función.
+ * @param array  $params  Lista de nombres de parámetros.
+ * @param string $retorno Tipo de retorno de la función (por defecto: 'void').
+ * @return string Retorna el bloque de documentación generado.
  */
-
-function generarDocFuncion($nombre, $params, $retorno = 'void') {
+function generarDocFuncion(string $nombre, array $params, string $retorno = 'void'): string
+{
     $doc = "/**\n";
     $doc .= " * [Descripción pendiente por completar]\n";
     foreach ($params as $param) {
-        $doc .= " * @param mixed \$$param\n";
+        $doc .= " * @param mixed \$$param Descripción del parámetro.\n";
     }
-    $doc .= " * @return $retorno\n";
+    $doc .= " * @return $retorno Descripción del valor retornado.\n";
     $doc .= " */\n";
     return $doc;
 }
 
 /**
- * [Descripción pendiente por completar]
- * @param mixed $nombre
- * @return void
+ * Genera la documentación PHPDoc para una propiedad.
+ *
+ * @param string $nombre Nombre de la propiedad.
+ * @return string Retorna el bloque de documentación generado.
  */
-
-function generarDocPropiedad($nombre) {
+function generarDocPropiedad(string $nombre): string
+{
     return "/**\n * [Descripción de la propiedad]\n * @var mixed\n */\n";
 }
 
 /**
- * [Descripción pendiente por completar]
- * @param mixed $nombre
- * @return void
+ * Genera la documentación PHPDoc para una clase.
+ *
+ * @param string $nombre Nombre de la clase.
+ * @return string Retorna el bloque de documentación generado.
  */
-
-function generarDocClase($nombre) {
+function generarDocClase(string $nombre): string
+{
     return "/**\n * [Descripción de la clase $nombre]\n */\n";
 }
 
 /**
- * [Descripción pendiente por completar]
- * @param mixed $archivo
+ * Procesa un archivo PHP para generar o corregir bloques de documentación PHPDoc.
+ *
+ * @param string $archivo Ruta del archivo a procesar.
  * @return void
  */
-
-function procesarArchivo($archivo) {
+function procesarArchivo(string $archivo): void
+{
     if (!file_exists($archivo)) {
         echo "⚠️ Archivo no encontrado: $archivo\n";
         return;
@@ -67,7 +72,7 @@ function procesarArchivo($archivo) {
 
         // Validar clase
         if (preg_match('/^\s*(final\s+)?class\s+(\w+)/', $linea, $match)) {
-            if ($i == 0 || !preg_match('/\*\//', $lineas[$i - 1])) {
+            if ($i === 0 || !preg_match('/\*\//', $lineas[$i - 1])) {
                 $nuevaSalida[] = generarDocClase($match[2]);
                 $modificado = true;
             }
@@ -75,7 +80,7 @@ function procesarArchivo($archivo) {
 
         // Validar propiedad
         if (preg_match('/^\s*(public|protected|private)\s+\$[\w]+[ ;=]/', $linea)) {
-            if ($i == 0 || !preg_match('/\*\//', $lineas[$i - 1])) {
+            if ($i === 0 || !preg_match('/\*\//', $lineas[$i - 1])) {
                 $nuevaSalida[] = generarDocPropiedad('');
                 $modificado = true;
             }
@@ -83,7 +88,7 @@ function procesarArchivo($archivo) {
 
         // Validar función
         if (preg_match('/^\s*(public|protected|private)?\s*function\s+(\w+)\s*\((.*?)\)/', $linea, $match)) {
-            if ($i == 0 || !preg_match('/\*\//', $lineas[$i - 1])) {
+            if ($i === 0 || !preg_match('/\*\//', $lineas[$i - 1])) {
                 $parametros = array_filter(array_map(function ($p) {
                     return trim(preg_replace('/.*\$/', '', $p));
                 }, explode(',', $match[3])));
@@ -102,11 +107,4 @@ function procesarArchivo($archivo) {
     } else {
         echo "✔️ Documentación ya válida en: $archivo\n";
     }
-}
-
-// Archivos pasados desde el pre-push
-$archivos = array_slice($argv, 1);
-
-foreach ($archivos as $archivo) {
-    procesarArchivo($archivo);
 }
