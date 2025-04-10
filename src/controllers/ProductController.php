@@ -11,24 +11,25 @@ use PDOException;
 /**
  * Clase ProductController.
  *
- * Esta clase representa el controlador encargado de gestionar productos incluyendo su obtencion desde la base de datos.
+ * Esta clase se encarga de gestionar la obtencion de productos desde la base de datos.
  *
- * @category Utilidades
- * @package  CustomModules
- * @author   Desconocido
- * @version  1.0.0
- * @since    2025-04-10
+ * @category Controllers
+ * @package  Controllers
+ * @author   Ronald
+ * @version  1.0
+ * @since    2025-04-09
  */
 class ProductController
 {
     /**
      * Metodo getProducts.
      *
-     * Obtiene todos los productos desde la base de datos utilizando una conexión PDO.
+     * Este metodo obtiene los productos almacenados en la base de datos
+     * y los convierte en objetos Product.
      *
-     * @param PDO $pdo Instancia de la conexión PDO a la base de datos.
+     * @param PDO $pdo Instancia de conexion a la base de datos.
      *
-     * @return array Arreglo de objetos Product obtenidos desde la base de datos.
+     * @return array Arreglo de objetos Product.
      */
     public function getProducts(PDO $pdo): array
     {

@@ -19,7 +19,6 @@
  * @since  2025-04-09
  */
 
-
 declare(strict_types=1);
 
 /**
