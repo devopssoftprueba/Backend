@@ -1,60 +1,37 @@
 <?php
 
-declare(strict_types=1);
+namespace controllers;
 
-namespace Controllers;
-
-use Models\Product;
 use PDO;
 use PDOException;
 
 /**
- * Clase ProductController.
+ * Class ProductController
  *
- * Esta clase se encarga de gestionar la obtencion de productos desde la base de datos.
+ * Controlador para manejar las operaciones relacionadas con productos.
  *
- * @category Controllers
+ * @category Controller
  * @package  Controllers
  * @author   Ronald
  * @version  1.0
- * @since    2025-04-09
+ * @since    2024-01-01
  */
 class ProductController
 {
     /**
-     * Metodo getProducts.
+     * Get products from the database using PDO.
      *
-     * Este metodo obtiene los productos almacenados en la base de datos
-     * y los convierte en objetos Product.
-     *
-     * @param PDO $pdo Instancia de conexion a la base de datos.
-     *
-     * @return array Arreglo de objetos Product.
+     * @return array Arreglo asociativo con los datos de los productos.
      */
-    public function getProducts(PDO $pdo): array
+    public function getProductsPDO(): array
     {
         try {
-            /**
-             * Consulta SQL para obtener productos.
-             *
-             * @lang sql
-             */
-            $stmt = $pdo->query('SELECT id, name, price FROM products');
-            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $db = new PDO('mysql:host=localhost;dbname=test_db', 'root', '');
+            $stmt = $db->query('SELECT * FROM products');
 
-            $products = [];
-
-            foreach ($result as $row) {
-                $products[] = new Product(
-                    (int) $row['id'],
-                    $row['name'],
-                    (float) $row['price']
-                );
-            }
-
-            return $products;
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            return [];
+            return ['error' => $e->getMessage()];
         }
     }
 }

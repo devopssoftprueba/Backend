@@ -1,70 +1,59 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Models;
+namespace models;
 
 /**
- * Clase Product.
+ * Class Product
  *
- * Esta clase representa un producto con identificador, nombre y precio.
+ * Modelo que representa un producto del sistema.
  *
- * @category Models
- * @package  Models
+ * @category Model
+ * @package  models
  * @author   Ronald
  * @version  1.0
- * @since    2025-04-09
+ * @since    2024-01-01
  */
 class Product
 {
     /**
-     * Identificador unico del producto.
+     * Descripcion de la documentacion
      *
-     * @var integer $id Identificador del producto.
+     * @var integer $id Identificador único del producto.
      */
     private int $id;
 
     /**
-     * Nombre del producto.
+     * Descripcion de la documentacion
      *
      * @var string $name Nombre del producto.
      */
     private string $name;
 
     /**
-     * Precio del producto.
+     * Descripcion de la documentacion
      *
      * @var float $price Precio del producto.
      */
     private float $price;
 
     /**
-     * Metodo constructor.
+     * Constructor del modelo Product.
      *
-     * Este metodo inicializa un producto con sus atributos basicos.
-     *
-     * @param integer $id    Identificador unico del producto.
-     * @param string  $name  Nombre del producto.
-     * @param float   $price Precio del producto.
-     *
-     * @return void Este metodo no retorna ningun valor.
+     * @param integer    $id ID del producto.
+     * @param string     $name Nombre del producto.
+     * @param float      $price Precio del producto.
      */
-    public function __construct(
-        int $id,
-        string $name,
-        float $price
-    ) {
+    public function __construct(int $id, string $name, float $price)
+    {
         $this->id    = $id;
         $this->name  = $name;
         $this->price = $price;
     }
 
     /**
-     * Metodo toArray.
+     * Devuelve los datos del producto en forma de arreglo.
      *
-     * Este metodo convierte el producto a un arreglo asociativo.
-     *
-     * @return array Arreglo con los datos del producto.
+     * @return array Datos del producto
      */
     public function toArray(): array
     {

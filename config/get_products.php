@@ -1,14 +1,11 @@
 <?php
 
-declare(strict_types=1);
+require_once __DIR__ . '/../vendor/autoload.php'; // Carga automática de clases PSR-4
 
-use Controllers\ProductController;
-
-require_once __DIR__ . '/../vendor/autoload.php'; // Si usas Composer
-$pdo = require_once __DIR__ . '/database.php';     // Esto asigna el return del archivo a $pdo
+use Controllers\ProductController; // Usamos el namespace correcto mapeado en composer.json
 
 $controller = new ProductController();
-$products = $controller->getProducts($pdo);
+$products   = $controller->getProductsPDO();
 
+header('Content-Type: application/json');
 echo json_encode($products);
-
