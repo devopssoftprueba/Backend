@@ -21,6 +21,28 @@ namespace Models;
  * @version  1.0.0
  * @since    2025-04-10
  */
+/**
+ * Clase Product.
+ *
+ * Esta clase representa la entidad Product y contiene sus métodos y propiedades asociadas.
+ *
+ * @category Utilidades
+ * @package  CustomModules
+ * @author   Desconocido
+ * @version  1.0.0
+ * @since    2025-04-10
+ */
+/**
+ * Clase Product.
+ *
+ * Esta clase representa la entidad Product y contiene sus métodos y propiedades asociadas.
+ *
+ * @category Utilidades
+ * @package  CustomModules
+ * @author   Desconocido
+ * @version  1.0.0
+ * @since    2025-04-10
+ */
 class Product
 {
     /**
@@ -52,6 +74,7 @@ class Product
      * @param float   $price Precio del producto.
      */
     /**
+    /**
  * Método __construct.
  *
  * Descripción del método __construct.
@@ -76,6 +99,20 @@ class Product
      *
      * @return array Arreglo con los datos del producto.
      */
+    /**
+ * Metodo toArray.
+ *
+ * Descripción del metodo toArray.
+     *
+ * @return array Descripción del valor retornado.
+ */
+    /**
+ * Metodo toArray.
+ *
+ * Descripción del metodo toArray.
+     *
+ * @return array Descripción del valor retornado.
+ */
     /**
  * Método toArray.
  *
