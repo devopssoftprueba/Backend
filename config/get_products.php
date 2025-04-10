@@ -11,3 +11,4 @@ $controller = new ProductController();
 $products = $controller->getProducts($pdo);
 
 echo json_encode($products);
+

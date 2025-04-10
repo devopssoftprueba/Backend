@@ -1,105 +1,44 @@
-#!/bin/bash
+#!/bin/sh
 
-# --------------------------------------------------------------------
-# Validación y corrección automática de documentación PHPDoc.
-# Este hook pre-push:
-# 1. Detecta archivos PHP modificados.
-# 2. Corrige automáticamente la documentación PHPDoc.
-# 3. Organiza la documentación según la plantilla establecida.
-# 4. Ejecuta PHPCS para validar estilo y formato.
-# 5. Si hay errores tras la corrección, bloquea el push.
-# --------------------------------------------------------------------
+echo "🚀 Iniciando validación de documentación y código PHP antes del push..."
 
-echo "🔧 Iniciando proceso de corrección, organización y validación PHPDoc..."
+# Detectar archivos modificados respecto a origin/main
+MODIFIED_FILES=$(git diff --cached --name-only origin/main -- '*.php')
 
-# Detectar archivos PHP modificados en staging
-FILES=$(git diff --cached --name-only origin/$(git rev-parse --abbrev-ref HEAD) | grep -E '\.php$')
-
-if [ -z "$FILES" ]; then
-  echo "✅ No hay archivos PHP modificados para validar."
-  exit 0
+if [ -z "$MODIFIED_FILES" ]; then
+    echo "✅ No se detectaron archivos PHP modificados para validar."
+    exit 0
 fi
+
+echo "📄 Archivos modificados detectados:"
+echo "$MODIFIED_FILES"
+
+# Ejecutar el script personalizado para documentar y validar PHPDoc
+echo "🔍 Ejecutando script de validación y generación automática de documentación..."
+php scripts/doc-fixer.php $MODIFIED_FILES
+DOC_EXIT_CODE=$?
+
+if [ $DOC_EXIT_CODE -ne 0 ]; then
+    echo "❌ Error al ejecutar doc-fixer.php. Se detiene el push."
+    exit 1
+fi
+
+# Validar con PHPCS solo los archivos modificados
+echo "🧪 Ejecutando PHPCS en los archivos modificados..."
 
 ERROR=0
-FILES_CORREGIDOS=()
-FILES_CON_ERRORES=()
-FILES_VALIDOS=()
-
-for FILE in $FILES; do
-  if [ -f "$FILE" ]; then
-    echo ""
-    echo "📂 Procesando archivo: $FILE"
-
-    # Ejecutar el script de corrección y organización PHPDoc
-    echo "📄 Ejecutando scripts de documentación automática en: $FILE"
-    CORRECCION_OUTPUT=$(php scripts/run-doc-fixer.php "$FILE")
-    echo "🛠️ Resultado de corrección automática:"
-    echo "$CORRECCION_OUTPUT"
-
-    # Ejecutar PHPCBF para corrección automática de estilo
-    echo "🔍 Ejecutando PHPCBF..."
-    PHPCBF_OUTPUT=$(php vendor/bin/phpcbf "$FILE")
-    echo "$PHPCBF_OUTPUT"
-
-    # Validar con PHPCS
-    echo "✅ Ejecutando PHPCS..."
-    PHPCS_OUTPUT=$(php vendor/bin/phpcs "$FILE")
-    PHPCS_STATUS=$?
-
-    if [ $PHPCS_STATUS -ne 0 ]; then
-      echo "❌ PHPCS detectó errores en: $FILE"
-      echo "$PHPCS_OUTPUT"
-      FILES_CON_ERRORES+=("$FILE")
-      ERROR=1
-    else
-      echo "✅ PHPCS validó correctamente el archivo: $FILE"
-
-      # Detectar si se aplicaron correcciones o adiciones de documentación
-      if echo "$CORRECCION_OUTPUT" | grep -qE "corregida|agregada|organizada"; then
-        echo "📌 Documentación modificada o reestructurada en: $FILE"
-        FILES_CORREGIDOS+=("$FILE")
-      else
-        echo "📘 Archivo válido y sin necesidad de cambios: $FILE"
-        FILES_VALIDOS+=("$FILE")
-      fi
+for file in $MODIFIED_FILES; do
+    echo "➡️ Validando $file"
+    ./vendor/bin/phpcs "$file"
+    if [ $? -ne 0 ]; then
+        ERROR=1
     fi
-  else
-    echo "⚠️ Archivo omitido (no existe): $FILE"
-  fi
 done
 
-# 🧾 Log resumen detallado
-echo ""
-echo "📋 RESUMEN FINAL DEL PROCESO"
-echo "─────────────────────────────"
-
-if [ ${#FILES_CORREGIDOS[@]} -gt 0 ]; then
-  echo "🛠️ Archivos con documentación corregida o organizada:"
-  for f in "${FILES_CORREGIDOS[@]}"; do
-    echo "   - $f"
-  done
-fi
-
-if [ ${#FILES_VALIDOS[@]} -gt 0 ]; then
-  echo "✅ Archivos válidos sin necesidad de modificación:"
-  for f in "${FILES_VALIDOS[@]}"; do
-    echo "   - $f"
-  done
-fi
-
-if [ ${#FILES_CON_ERRORES[@]} -gt 0 ]; then
-  echo "❌ Archivos con errores pendientes:"
-  for f in "${FILES_CON_ERRORES[@]}"; do
-    echo "   - $f"
-  done
-fi
-
-# Resultado final
-echo ""
 if [ $ERROR -ne 0 ]; then
-  echo "🚫 Push cancelado. Debes corregir los errores antes de continuar."
-  exit 1
-else
-  echo "🎉 Todo validado correctamente. Push permitido."
-  exit 0
+    echo "❌ Errores detectados por PHPCS. Corrige antes de hacer push."
+    exit 1
 fi
+
+echo "✅ Validación completada sin errores. Procediendo con el push."
+exit 0
