@@ -4,146 +4,101 @@
  * Script para analizar y documentar automaticamente archivos PHP
  * utilizando PHPDoc conforme a una plantilla personalizada y estricta.
  *
- * Este script escanea el proyecto identifica las clases metodos y
- * propiedades en cada archivo PHP y realiza lo siguiente:
+ * Este script escanea todo el proyecto identifica las clases metodos y propiedades
+ * en cada archivo PHP y realiza lo siguiente:
  *
- * 1. Si NO tienen documentacion, se la agrega completa siguiendo una plantilla estandar.
- * 2. Si TIENEN documentacion, valida si cumple con la plantilla:
- *  - Si cumple la deja intacta.
- *  - Si esta mal la elimina completamente y la reemplaza con una documentacion nueva correcta.
+ * 1. Si no tienen documentacion, se la agrega completa siguiendo una plantilla estandar.
+ * 2. Si tienen documentacion, valida si cumple con la plantilla:
+ *    - Si cumple, la deja intacta.
+ *    - Si esta mal, la elimina completamente y la reemplaza con una nueva.
  *
  * Este proceso permite mantener la documentacion uniforme, clara y alineada con los estandares
  * definidos por la empresa o el equipo de desarrollo.
  *
  * @author Ronald
- * @since  2025-04-09
+ * @since  2025-04-10
  */
 
-declare(strict_types=1);
+$directory = __DIR__ . '/../src/';
+$phpFiles = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directory));
+$log = [];
 
-/**
- * Escanea el proyecto desde la raiz, identificando todos los archivos con extension `.php`.
- *
- * @return void
- */
-function ejecutarDocFixer(): void
-{
-    $dir = __DIR__ . '/../';
-    $phpFiles = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir));
+foreach ($phpFiles as $file) {
+    if ($file->getExtension() !== 'php') {
+        continue;
+    }
 
-    foreach ($phpFiles as $file) {
-        if ($file->getExtension() === 'php') {
-            processFile($file->getPathname());
+    $filePath = $file->getRealPath();
+    $originalCode = file_get_contents($filePath);
+    $tokens = token_get_all($originalCode);
+
+    $newCode = '';
+    $buffer = '';
+    $isInDocBlock = false;
+    $className = '';
+    $insideClass = false;
+    $namespace = '';
+
+    foreach ($tokens as $token) {
+        if (is_array($token)) {
+            [$id, $text] = $token;
+
+            // Capturar namespace
+            if ($id === T_NAMESPACE) {
+                $buffer = $text;
+                continue;
+            }
+
+            if ($id === T_STRING && str_contains($buffer, 'namespace')) {
+                $namespace .= trim($text);
+                $buffer = '';
+            }
+
+            // Remover docblocks mal formados antes de clase/metodo/propiedad
+            if ($id === T_DOC_COMMENT && !preg_match('/@(?:category|package|author|version|since)/', $text)) {
+                $isInDocBlock = true;
+                continue;
+            }
+
+            if ($id === T_CLASS) {
+                $insideClass = true;
+                $newCode .= "\n\n    /**\n     * Clase {$text}.\n     *\n     * Esta clase representa un modelo dentro del sistema.\n     *\n     * @category {$namespace}\n     * @package  {$namespace}\n     * @author   Ronald\n     * @version  1.0\n     * @since    2025-04-10\n     */";
+            }
+
+            if ($insideClass && $id === T_VARIABLE) {
+                $varName = trim($text, '$');
+                $type = 'mixed';
+                if (str_contains($newCode, "private int \${$varName}")) {
+                    $type = 'integer';
+                } elseif (str_contains($newCode, "private string \${$varName}")) {
+                    $type = 'string';
+                } elseif (str_contains($newCode, "private float \${$varName}")) {
+                    $type = 'float';
+                }
+                $newCode .= "\n\n    /**\n     * {$varName} del modelo.\n     *\n     * @var {$type} \${$varName} Descripcion del atributo.\n     */";
+            }
+
+            if ($id === T_FUNCTION) {
+                $buffer = '';
+            }
+
+            $newCode .= $text;
+        } else {
+            if (!$isInDocBlock) {
+                $newCode .= $token;
+            } else {
+                $isInDocBlock = false;
+            }
         }
+    }
+
+    if ($newCode !== $originalCode) {
+        file_put_contents($filePath, $newCode);
+        $log[] = "📄 Archivo corregido: {$filePath}";
     }
 }
 
-/**
- * Procesa un archivo PHP especifico y genera documentacion PHPDoc
- * para todas las clases, propiedades y metodos encontradas dentro del archivo.
- *
- * @param string $filePath Ruta absoluta del archivo PHP a procesar.
- *
- * @return void
- */
-function processFile(string $filePath): void
-{
-    $content = file_get_contents($filePath);
-
-    // DOCUMENTAR CLASES
-    $content = preg_replace_callback(
-        '/(?:\/\*\*[\s\S]*?\*\/\s*)?(class\s+(\w+)\s*(?:extends\s+\w+)?\s*\{)/',
-        function ($matches) {
-            $className = $matches[2];
-            $fecha = date('Y-m-d');
-
-            $docBlock = <<<EOD
-/**
- * Clase $className.
- *
- * Esta clase representa la entidad $className y contiene sus metodos y propiedades asociadas.
- *
- * @category   Utilidades
- * @package    CustomModules
- * @author     Desconocido
- * @version    1.0.0
- * @since      $fecha
- */
-EOD;
-            return $docBlock . "\n" . $matches[1];
-        },
-        $content
-    );
-
-    // DOCUMENTAR PROPIEDADES
-    $content = preg_replace_callback(
-        '/(?:\/\*\*[\s\S]*?\*\/\s*)?((private|protected|public)\s+\$([a-zA-Z0-9_]+)\s*;)/',
-        function ($matches) {
-            $visibility = $matches[2];
-            $name = $matches[3];
-
-            return <<<EOD
-/**
- * Propiedad \$$name.
- *
- * @var mixed Descripcion no definida.
- */
-$visibility \$$name;
-EOD;
-        },
-        $content
-    );
-
-    // DOCUMENTAR METODOS
-    $content = preg_replace_callback(
-        pattern: '/(?:\/\*\*[\s\S]*?\*\/\s*)?' .
-        '((public|protected|private)\s+function\s+(\w+)\s*' .
-        '\(([^)]*)\)(\s*:\s*\??\w+)?\s*\{)/',
-        callback: function ($matches) {
-            $visibility = $matches[2];
-            $name = $matches[3];
-            $params = trim($matches[4]);
-            $returnType = $matches[5] ?? '';
-            $paramLines = '';
-
-            if ($params !== '') {
-                $paramsArray = explode(',', $params);
-                foreach ($paramsArray as $param) {
-                    preg_match('/(\??\w+)?\s*\$([\w_]+)/', trim($param), $pMatch);
-                    $type = $pMatch[1] ?? 'mixed';
-                    $pname = $pMatch[2] ?? 'param';
-                    $paramLines .= " * @param $type \$$pname Descripcion del parametro.\n";
-                }
-            }
-
-            $return = 'void';
-            if (trim($returnType)) {
-                $return = str_replace([':', '?'], '', trim($returnType));
-            }
-
-            return <<<EOD
-/**
- * Metodo $name.
- *
- * Descripcion del metodo $name.
-$paramLines *
- * @return $return Descripcion del valor retornado.
- */
-$visibility function $name($params)$returnType {
-EOD;
-        },
-        subject: $content
-    );
-
-    file_put_contents($filePath, $content);
-}
-
-/**
- * Funcion principal que ejecuta el script si se desea invocar directamente.
- *
- * @return void
- */
-function main(): void
-{
-    ejecutarDocFixer();
+echo "📋 RESUMEN DE DOCUMENTACION AUTOMATICA\n";
+foreach ($log as $entry) {
+    echo $entry . "\n";
 }
