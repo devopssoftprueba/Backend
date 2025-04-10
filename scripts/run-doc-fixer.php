@@ -1,98 +1,81 @@
 <?php
 
 /**
- * Script para analizar y documentar automáticamente un archivo PHP
- * utilizando PHPDoc conforme a una plantilla personalizada y estricta.
+ * Script que ejecuta la documentación automática sobre todos los archivos del proyecto,
+ * incluyendo validación con PHPCS y PHPCBF.
  *
- * Este script:
- * 1. Valida si el archivo tiene documentación PHPDoc conforme a plantilla.
- * 2. Si no tiene, la genera.
- * 3. Si está mal, la reemplaza.
- * 4. Si está bien, no la toca.
+ * @author Ronald
+ * @since  2025-04-10
  */
 
-if ($argc < 2) {
-    echo "❌ Debes proporcionar un archivo PHP a analizar.\n";
-    exit(1);
-}
+$basePath = __DIR__ . '/../';
+$sourcePath = $basePath . 'src/';
+$scriptPath = $basePath . 'scripts/doc-fixer.php';
 
-$filePath = $argv[1];
+$phpFiles = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($basePath));
 
-if (!file_exists($filePath)) {
-    echo "❌ El archivo no existe: $filePath\n";
-    exit(1);
-}
+$erroresPendientes = [];
+$archivosValidos = [];
 
-$originalCode = file_get_contents($filePath);
-$tokens = token_get_all($originalCode);
+foreach ($phpFiles as $file) {
+    if (
+        $file->getExtension() !== 'php' ||
+        str_contains($file->getRealPath(), 'vendor') ||
+        str_contains($file->getRealPath(), 'tests') ||
+        str_contains($file->getRealPath(), 'config') ||
+        str_contains($file->getRealPath(), '.git')
+    ) {
+        continue;
+    }
 
-$newCode = '';
-$buffer = '';
-$isInDocBlock = false;
-$className = '';
-$insideClass = false;
-$namespace = '';
-$modified = false;
+    $path = $file->getRealPath();
+    echo "📂 Procesando archivo: " . str_replace($basePath, '', $path) . PHP_EOL;
 
-foreach ($tokens as $token) {
-    if (is_array($token)) {
-        [$id, $text] = $token;
+    echo "📄 Ejecutando scripts de documentación automática en: " . str_replace($basePath, '', $path) . PHP_EOL;
+    passthru("php {$scriptPath} \"{$path}\"", $docResultCode);
 
-        // Capturar namespace
-        if ($id === T_NAMESPACE) {
-            $buffer = $text;
-            continue;
-        }
-
-        if ($id === T_STRING && str_contains($buffer, 'namespace')) {
-            $namespace .= trim($text);
-            $buffer = '';
-        }
-
-        // Remover docblocks mal formados antes de clase/metodo/propiedad
-        if ($id === T_DOC_COMMENT && !preg_match('/@(?:category|package|author|version|since)/', $text)) {
-            $isInDocBlock = true;
-            $modified = true;
-            continue;
-        }
-
-        if ($id === T_CLASS) {
-            $insideClass = true;
-            $newCode .= "\n\n    /**\n     * Clase {$text}.\n     *\n     * Esta clase representa un modelo dentro del sistema.\n     *\n     * @category {$namespace}\n     * @package  {$namespace}\n     * @author   Ronald\n     * @version  1.0\n     * @since    2025-04-10\n     */";
-            $modified = true;
-        }
-
-        if ($insideClass && $id === T_VARIABLE) {
-            $varName = trim($text, '$');
-            $type = 'mixed';
-            if (str_contains($newCode, "private int \${$varName}")) {
-                $type = 'integer';
-            } elseif (str_contains($newCode, "private string \${$varName}")) {
-                $type = 'string';
-            } elseif (str_contains($newCode, "private float \${$varName}")) {
-                $type = 'float';
-            }
-            $newCode .= "\n\n    /**\n     * {$varName} del modelo.\n     *\n     * @var {$type} \${$varName} Descripcion del atributo.\n     */";
-            $modified = true;
-        }
-
-        if ($id === T_FUNCTION) {
-            $buffer = '';
-        }
-
-        $newCode .= $text;
+    echo "🛠️ Resultado de corrección automática:" . PHP_EOL;
+    if ($docResultCode !== 0) {
+        echo "❌ Error durante la documentación automática." . PHP_EOL;
     } else {
-        if (!$isInDocBlock) {
-            $newCode .= $token;
-        } else {
-            $isInDocBlock = false;
-        }
+        echo "🛠️ Documentación corregida o agregada." . PHP_EOL;
+    }
+
+    echo "🔍 Ejecutando PHPCBF..." . PHP_EOL;
+    passthru("vendor/bin/phpcbf \"{$path}\"");
+
+    echo "✅ Ejecutando PHPCS..." . PHP_EOL;
+    ob_start();
+    passthru("vendor/bin/phpcs \"{$path}\"", $phpcsCode);
+    $phpcsOutput = ob_get_clean();
+    echo $phpcsOutput;
+
+    if ($phpcsCode !== 0) {
+        $erroresPendientes[] = str_replace($basePath, '', $path);
+    } else {
+        $archivosValidos[] = str_replace($basePath, '', $path);
     }
 }
 
-if ($modified && $newCode !== $originalCode) {
-    file_put_contents($filePath, $newCode);
-    echo "🛠️ Documentación corregida o agregada.";
-} else {
-    echo "✅ Documentación ya estaba correcta. Sin cambios.";
+echo "📋 RESUMEN FINAL DEL PROCESO" . PHP_EOL;
+echo "─────────────────────────────" . PHP_EOL;
+
+if (!empty($archivosValidos)) {
+    echo "✅ Archivos válidos sin necesidad de modificación:" . PHP_EOL;
+    foreach ($archivosValidos as $file) {
+        echo "   - {$file}" . PHP_EOL;
+    }
 }
+
+if (!empty($erroresPendientes)) {
+    echo "❌ Archivos con errores pendientes:" . PHP_EOL;
+    foreach ($erroresPendientes as $file) {
+        echo "   - {$file}" . PHP_EOL;
+    }
+
+    echo "🚫 Push cancelado. Debes corregir los errores antes de continuar." . PHP_EOL;
+    exit(1);
+}
+
+echo "🎉 Todos los archivos están correctos. Puedes hacer push sin problemas." . PHP_EOL;
+exit(0);

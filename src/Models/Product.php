@@ -43,8 +43,8 @@ class Product
      *
      * Este metodo inicializa un producto con sus atributos basicos.
      *
-     * @param integer $id Identificador unico del producto.
-     * @param string  $name Nombre del producto.
+     * @param integer $id    Identificador unico del producto.
+     * @param string  $name  Nombre del producto.
      * @param float   $price Precio del producto.
      *
      * @return void Este metodo no retorna ningun valor.
