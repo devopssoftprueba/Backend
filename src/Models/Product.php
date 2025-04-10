@@ -5,34 +5,6 @@ declare(strict_types=1);
 namespace Models;
 
 /**
- * Clase que representa un producto.
- *
- * @category Models
- * @package  Models
- */
-/**
- * Clase Product.
- *
- * Esta clase representa la entidad Product y contiene sus métodos y propiedades asociadas.
- *
- * @category Utilidades
- * @package  CustomModules
- * @author   Desconocido
- * @version  1.0.0
- * @since    2025-04-10
- */
-/**
- * Clase Product.
- *
- * Esta clase representa la entidad Product y contiene sus métodos y propiedades asociadas.
- *
- * @category Utilidades
- * @package  CustomModules
- * @author   Desconocido
- * @version  1.0.0
- * @since    2025-04-10
- */
-/**
  * Clase Product.
  *
  * Esta clase representa la entidad Product y contiene sus métodos y propiedades asociadas.
@@ -48,42 +20,35 @@ class Product
     /**
      * ID del producto.
      *
-     * @var integer
+     * @var integer Identificador único del producto.
      */
     private int $id;
 
     /**
      * Nombre del producto.
      *
-     * @var string
+     * @var string Nombre del producto.
      */
     private string $name;
 
     /**
      * Precio del producto.
      *
-     * @var float
+     * @var float Precio del producto.
      */
     private float $price;
 
     /**
-     * Constructor de la clase Product.
+     * Metodo __construct.
      *
-     * @param integer $id    ID del producto.
-     * @param integer $name  Nombre del producto.
+     * Inicializa un nuevo producto con su ID, nombre y precio.
+     *
+     * @param integer $id    Identificador del producto.
+     * @param string  $name  Nombre del producto.
      * @param float   $price Precio del producto.
-     */
-    /**
-    /**
- * Método __construct.
- *
- * Descripción del método __construct.
      *
- * @param  integer $id    Descripción del parámetro.
- * @param  string  $name  Descripción del parámetro.
- * @param  float   $price Descripción del parámetro.
- * @return void Descripción del valor retornado.
- */
+     * @return void
+     */
     public function __construct(
         int $id,
         string $name,
@@ -95,31 +60,12 @@ class Product
     }
 
     /**
-     * Devuelve los datos del producto como arreglo.
+     * Metodo toArray.
+     *
+     * Convierte el objeto Product en un arreglo asociativo.
      *
      * @return array Arreglo con los datos del producto.
      */
-    /**
- * Metodo toArray.
- *
- * Descripción del metodo toArray.
-     *
- * @return array Descripción del valor retornado.
- */
-    /**
- * Metodo toArray.
- *
- * Descripción del metodo toArray.
-     *
- * @return array Descripción del valor retornado.
- */
-    /**
- * Método toArray.
- *
- * Descripción del método toArray.
-     *
- * @return array Descripción del valor retornado.
- */
     public function toArray(): array
     {
         return [
