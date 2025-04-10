@@ -14,6 +14,17 @@ use PDOException;
  * @category Controllers
  * @package  Controllers
  */
+/**
+ * Clase ProductController.
+ *
+ * Esta clase representa la entidad ProductController y contiene sus métodos y propiedades asociadas.
+ *
+ * @category Utilidades
+ * @package  CustomModules
+ * @author   Desconocido
+ * @version  1.0.0
+ * @since    2025-04-10
+ */
 class ProductController
 {
     /**
@@ -23,6 +34,14 @@ class ProductController
      *
      * @return array Arreglo de productos.
      */
+    /**
+ * Método getProducts.
+ *
+ * Descripción del método getProducts.
+     *
+ * @param  PDO $pdo Descripción del parámetro.
+ * @return array Descripción del valor retornado.
+ */
     public function getProducts(PDO $pdo): array
     {
         try {
