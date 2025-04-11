@@ -2,22 +2,21 @@
 
 declare(strict_types=1);
 
-namespace Controllers;
+namespace VSBackend\src\controllers;
 
 use Models\Product;
 use PDO;
 use PDOException;
 
-
+/**
+ * Controlador para gestión de productos.
+ *
+ * @category Controllers
+ * @package  Controllers
+ */
 class ProductController
 {
-    /**
-     * Obtiene los productos desde la base de datos.
-     *
-     * @param PDO $pdo Conexión PDO a la base de datos.
-     *
-     * @return array Arreglo de productos.
-     */
+
     public function getProducts(PDO $pdo): array
     {
         try {
