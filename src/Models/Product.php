@@ -39,7 +39,7 @@ class Product
     /**
      * Constructor del modelo Product.
      *
-     * @param integer $id    ID del producto este tambien.
+     * @param integer $id    Identificador único del producto (comentario cambiado).
      * @param string  $name  Nombre del producto.
      * @param float   $price Precio del producto.
      */
@@ -62,5 +62,18 @@ class Product
             'name'  => $this->name,
             'price' => $this->price,
         ];
+    }
+
+    /**
+     * Calcula el precio con descuento aplicad.
+     *
+     * @param float $percentage Porcentaje de descuento a aplicar (ej. 10 para 10%).
+     *
+     * @return float Precio con descuento aplicado.
+     */
+    public function getDiscountedPrice(float $percentage): float
+    {
+        $discount = ($this->price * $percentage) / 100;
+        return $this->price - $discount;
     }
 }

@@ -16,9 +16,9 @@ class PHPDocValidator
     /**
      * Obtiene las líneas modificadas por archivo del último `git add`.
      *
-     * @return array<string, array<int, string>> Arreglo de líneas modificadas por archivo.
+     * @return array<string, array<int, int>> Arreglo de números de línea por archivo.
      */
-    public function getModifiedLinesByFile(): array
+    public function getModifiedLineNumbersByFile(): array
     {
         $output = [];
         exec('git diff --cached --unified=0 --no-color', $output);
@@ -32,8 +32,12 @@ class PHPDocValidator
                 continue;
             }
 
-            if ($currentFile !== null && str_starts_with($line, '+') && !str_starts_with($line, '+++')) {
-                $modified[$currentFile][] = $line;
+            if ($currentFile && preg_match('/^@@ \+\d+(?:,\d+)? @@/', $line)) {
+                preg_match('/\+(\d+)/', $line, $match);
+                $lineNumber = isset($match[1]) ? (int)$match[1] : null;
+                if ($lineNumber !== null) {
+                    $modified[$currentFile][] = $lineNumber;
+                }
             }
         }
 
@@ -43,12 +47,12 @@ class PHPDocValidator
     /**
      * Valida si las líneas nuevas tienen documentación PHPDoc correspondiente.
      *
-     * @param string $filePath      Ruta del archivo.
-     * @param array  $modifiedLines Líneas modificadas en ese archivo.
+     * @param string $filePath    Ruta del archivo.
+     * @param array  $lineNumbers Líneas modificadas en ese archivo.
      *
      * @return array Errores encontrados.
      */
-    public function validatePHPDoc(string $filePath, array $modifiedLines): array
+    public function validatePHPDoc(string $filePath, array $lineNumbers): array
     {
         $errors = [];
 
@@ -56,27 +60,11 @@ class PHPDocValidator
             return [];
         }
 
-        $code      = file_get_contents($filePath);
-        $tokens    = token_get_all($code);
-        $lineMap   = array_flip(array_map('trim', $modifiedLines));
-        $lines     = explode("\n", $code);
-        $lineNums  = [];
+        $code = file_get_contents($filePath);
+        $tokens = token_get_all($code);
+        $lineSet = array_flip($lineNumbers);
 
-        foreach ($modifiedLines as $modLine) {
-            $clean = ltrim($modLine, '+');
-            foreach ($lines as $i => $line) {
-                if (trim($line) === trim($clean)) {
-                    $lineNums[] = $i + 1;
-                    break;
-                }
-            }
-        }
-
-        $prevTokenWasDoc = false;
-        $insideClass     = false;
-        $insideFunction  = false;
-
-        for ($i = 0, $len = count($tokens); $i < $len; $i++) {
+        for ($i = 0; $i < count($tokens); $i++) {
             $token = $tokens[$i];
             if (!is_array($token)) {
                 continue;
@@ -84,56 +72,78 @@ class PHPDocValidator
 
             [$id, $text, $line] = $token;
 
-            if (!in_array($line, $lineNums, true)) {
-                continue;
-            }
+            if (isset($lineSet[$line])) {
+                switch ($id) {
+                    case T_CLASS:
+                        if (!$this->hasValidDocBlock($tokens, $i)) {
+                            $errors[] = "Línea {$line}: La clase no tiene docblock válido.";
+                        }
+                        break;
 
-            if ($id === T_DOC_COMMENT) {
-                $prevTokenWasDoc = true;
-                continue;
-            }
+                    case T_FUNCTION:
+                        if (!$this->hasValidDocBlock($tokens, $i)) {
+                            $errors[] = "Línea {$line}: La función o método no tiene docblock válido.";
+                        }
+                        break;
 
-            if ($id === T_CLASS) {
-                if (!$prevTokenWasDoc) {
-                    $errors[] = "Línea {$line}: La clase no tiene docblock.";
+                    case T_VARIABLE:
+                        if (!$this->hasValidDocBlock($tokens, $i)) {
+                            $errors[] = "Línea {$line}: La propiedad {$text} no tiene docblock válido.";
+                        }
+                        break;
                 }
             }
-
-            if ($id === T_FUNCTION) {
-                if (!$prevTokenWasDoc) {
-                    $errors[] = "Línea {$line}: La función o método no tiene docblock.";
-                }
-            }
-
-            if ($id === T_VARIABLE && $insideClass && !$insideFunction) {
-                if (!$prevTokenWasDoc) {
-                    $errors[] = "Línea {$line}: La propiedad {$text} no tiene docblock.";
-                }
-            }
-
-            $prevTokenWasDoc = false;
         }
 
         return $errors;
     }
 
     /**
-     * Recorre los archivos modificados y valida la documentación donde aplique.
+     * Verifica si hay un docblock inmediatamente antes del token actual.
+     *
+     * @param array   $tokens Arreglo con todos los tokens del archivo.
+     * @param integer $index  Índice actual del token a analizar.
+     *
+     * @return boolean
+     */
+    private function hasValidDocBlock(array $tokens, int $index): bool
+    {
+        for ($j = $index - 1; $j >= 0; $j--) {
+            if (!is_array($tokens[$j])) {
+                continue;
+            }
+
+            if (in_array($tokens[$j][0], [T_WHITESPACE, T_PUBLIC, T_PRIVATE, T_PROTECTED, T_STATIC])) {
+                continue;
+            }
+
+            if ($tokens[$j][0] === T_DOC_COMMENT) {
+                return true;
+            }
+
+            break;
+        }
+
+        return false;
+    }
+
+    /**
+     * Ejecuta la validación.
      *
      * @return void
      */
     public function run(): void
     {
-        $modifiedByFile = $this->getModifiedLinesByFile();
-        $hasErrors      = false;
+        $modified = $this->getModifiedLineNumbersByFile();
+        $hasErrors = false;
 
-        foreach ($modifiedByFile as $file => $lines) {
+        foreach ($modified as $file => $lineNumbers) {
             if (!str_ends_with($file, '.php')) {
                 continue;
             }
 
             echo "➡️ Validando {$file}...\n";
-            $errors = $this->validatePHPDoc($file, $lines);
+            $errors = $this->validatePHPDoc($file, $lineNumbers);
 
             if (!empty($errors)) {
                 echo "❌ Errores detectados en {$file}:\n";
@@ -147,14 +157,24 @@ class PHPDocValidator
             }
         }
 
-        if ($hasErrors === true) {
+        if ($hasErrors) {
             echo "❌ El push fue bloqueado por errores de documentación.\n";
             exit(1);
         }
 
+        echo "✅ Validación completada sin errores.\n";
         exit(0);
     }
+    /**
+     * Escribe un mensaje en el log.
+     *
+     * @param string $message Mensaje a registrar.
+     *
+     * @return void
+     */
+    private function log(string $message): void
+    {
+        $timestamp = date('[Y-m-d H:i:s]');
+        file_put_contents(__DIR__ . '/logs/doc-validator.log', "{$timestamp} {$message}\n", FILE_APPEND);
+    }
 }
-
-// Llamada al validador encapsulada como lógica separada (aceptada por PHPCS)
-(new PHPDocValidator())->run();
