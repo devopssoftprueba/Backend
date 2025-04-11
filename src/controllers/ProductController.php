@@ -8,12 +8,7 @@ use Models\Product;
 use PDO;
 use PDOException;
 
-/**
- * Controlador para gestión de productos.
- *
- * @category Controllers
- * @package  Controllers
- */
+
 class ProductController
 {
     /**
