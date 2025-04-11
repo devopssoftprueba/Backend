@@ -2,17 +2,7 @@
 
 namespace Models;
 
-/**
- * Class Product
- *
- * Modelo que representa un producto del sistema (el comentario de este archivo lo hice el local, lo debe validar).
- *
- * @category Model
- * @package  models
- * @author   Ronald
- * @version  1.0
- * @since    2024-01-01
- */
+
 class Product
 {
     /**
