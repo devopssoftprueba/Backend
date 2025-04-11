@@ -20,4 +20,17 @@ class Prueba
     {
         return $this->id;
     }
+    /**
+     * Establece el ID de prueba
+     *
+     * Asigna un nuevo valor al identificador de prueba.
+     *
+     * @param integer $id Identificador nuevo.
+     *
+     * @return void
+     */
+    public function setId(int $id): void
+    {
+        $this->id = $id;
+    }
 }
