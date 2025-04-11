@@ -1,6 +1,6 @@
 <?php
 
-namespace controllers;
+namespace Controllers;
 
 use PDO;
 use PDOException;
@@ -8,7 +8,8 @@ use PDOException;
 /**
  * Class ProductController
  *
- * Controlador para manejar las operaciones relacionadas con productos (esto que es nuevo se agrega desde github y no se debe validar nada de este archivo en el local).
+ * Controlado
+ * (esto que es nuevo se agrega desde github y no se debe validar nada de este archivo en el local).
  *
  * @category Controller
  * @package  Controllers
