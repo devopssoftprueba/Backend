@@ -12,10 +12,10 @@
         }
     },"scripts": {
     "post-install-cmd": [
-        "@php -r \"if (!is_dir('.git/hooks')) { echo '⚠️  No se encontró la carpeta .git/hooks. ¿Estás en un repositorio Git?\\n'; exit(1); } if (!copy('.githooks/pre-push', '.git/hooks/pre-push')) { echo '❌ No se pudo copiar el hook pre-push.\\n'; exit(1); } echo '✅ Hook pre-push instalado correctamente.\\n'; chmod('.git/hooks/pre-push', 0755);\""
+        "@php -r \"if (!is_dir('.githooks')) { echo '⚠️  No se encontró la carpeta .githooks. ¿Estás en un repositorio Git?\\n'; exit(1); } if (!copy('.githookspre-push', '.githooks/pre-push')) { echo '❌ No se pudo copiar el hook pre-push.\\n'; exit(1); } echo '✅ Hook pre-push instalado correctamente.\\n'; chmod('.githooks/pre-push', 0755);\""
     ],
     "post-update-cmd": [
-        "@php -r \"if (!is_dir('.git/hooks')) { echo '⚠️  No se encontró la carpeta .git/hooks. ¿Estás en un repositorio Git?\\n'; exit(1); } if (!copy('.githooks/pre-push', '.git/hooks/pre-push')) { echo '❌ No se pudo copiar el hook pre-push.\\n'; exit(1); } echo '✅ Hook pre-push actualizado correctamente.\\n'; chmod('.git/hooks/pre-push', 0755);\""
+        "@php -r \"if (!is_dir('.githooks')) { echo '⚠️  No se encontró la carpeta .githooks. ¿Estás en un repositorio Git?\\n'; exit(1); } if (!copy('.githookspre-push', '.githooks/pre-push')) { echo '❌ No se pudo copiar el hook pre-push.\\n'; exit(1); } echo '✅ Hook pre-push actualizado correctamente.\\n'; chmod('.githooks/pre-push', 0755);\""
     ]
 },
     "require": {
