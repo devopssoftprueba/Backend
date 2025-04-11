@@ -16,7 +16,13 @@ use PDOException;
  */
 class ProductController
 {
-
+    /**
+     * Obtiene los productos desde la base de datos.
+     *
+     * @param PDO $pdo Conexión PDO a la base de datos.
+     *
+     * @return array Arreglo de productos.
+     */
     public function getProducts(PDO $pdo): array
     {
         try {
