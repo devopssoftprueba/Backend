@@ -25,6 +25,12 @@ class ProductController
      */
     public function getProductsPDO(): array
     {
+        /**
+         * Descripción del metodo.
+         *
+         * @return void
+         */
+
         try {
             $db = new PDO('mysql:host=localhost;dbname=test_db', 'root', '');
             $stmt = $db->query('SELECT * FROM products');
