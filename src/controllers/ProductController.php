@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Controllers;
+namespace VSBackend\src\controllers;
 
 use Models\Product;
 use PDO;
