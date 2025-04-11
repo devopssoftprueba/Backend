@@ -1,14 +1,15 @@
 <?php
 
 /**
- * Script para validar la documentación PHPDoc en archivos PHP sin modificar la documentación ya existente.
+ * Script para validar la documentación PHPDoc en archivos PHP sin modificar la
+ * documentación ya existente.
  *
- * Este script escanea los archivos y verifica que las declaraciones
- * de clases, métodos y propiedades tengan un docblock antes de ellos.
- * Si falta el docblock se reporta como error.
+ * Este script escanea los archivos y verifica que las declaraciones de clases,
+ * métodos y propiedades tengan un docblock inmediatamente antes (ignorando tokens
+ * de espacio en blanco y comentarios en línea). Si falta el docblock, se reporta como error.
  *
- * La idea es que se ejecute en el hook pre-push para que, si algún bloque
- * nuevo o modificado carece de documentación, el push se bloquee.
+ * La idea es que se ejecute en el hook pre-push para bloquear el push si algún bloque
+ * nuevo o modificado carece de documentación.
  *
  * @author Ronald
  * @since  2025-04-10
@@ -30,58 +31,62 @@ foreach ($filesToValidate as $filePath) {
 
     $code = file_get_contents($filePath);
     $tokens = token_get_all($code);
-    $lineErrors = []; // errores del archivo
+    $lineErrors = []; // errores en el archivo
 
-    $prevTokenWasDoc = false;
-    $insideClass = false;
-    $insideFunction = false;
+    $docFound = false; // Indica que se encontró un docblock que puede servir para la siguiente declaración
+    $i = 0;
+    $len = count($tokens);
 
-    // Recorremos los tokens para buscar declaraciones importantes
-    for ($i = 0, $len = count($tokens); $i < $len; $i++) {
+    while ($i < $len) {
         $token = $tokens[$i];
         if (is_array($token)) {
             $id = $token[0];
             $text = $token[1];
             $line = $token[2] ?? 'desconocida';
 
-            // Si encontramos un docblock, lo registramos
+            // Si se encuentra un docblock, lo marcamos y avanzamos
             if ($id === T_DOC_COMMENT) {
-                $prevTokenWasDoc = true;
+                $docFound = true;
+                $i++;
                 continue;
             }
 
-            // Detectar declaración de clase
+            // Si el token es espacio en blanco o un comentario de línea, se ignoran
+            if (in_array($id, [T_WHITESPACE, T_COMMENT])) {
+                $i++;
+                continue;
+            }
+
+            // Si encontramos una declaración de clase
             if ($id === T_CLASS) {
-                $insideClass = true;
-                if (!$prevTokenWasDoc) {
+                if (!$docFound) {
                     $lineErrors[] = "Línea {$line}: La declaración de la clase no tiene docblock.";
                 }
-                $prevTokenWasDoc = false;
+                $docFound = false;
             }
 
-            // Detectar declaración de función
+            // Si encontramos una declaración de función
             if ($id === T_FUNCTION) {
-                $insideFunction = true;
-                if (!$prevTokenWasDoc) {
+                if (!$docFound) {
                     $lineErrors[] = "Línea {$line}: La declaración de la función no tiene docblock.";
                 }
-                $prevTokenWasDoc = false;
+                $docFound = false;
             }
 
-            // Detectar propiedades: si se encuentra T_VARIABLE y el token anterior fue una declaración de visibilidad
-            if ($id === T_VARIABLE && $insideClass && !$insideFunction) {
-                // Buscamos si antes de la propiedad hay un docblock
-                if (!$prevTokenWasDoc) {
+            // Si encontramos una propiedad (T_VARIABLE) en el ámbito de una clase y no dentro de una función,
+            // asumiremos que debe tener docblock.
+            // Para simplificar, no se verifica contexto exacto (ya que podría ser variable local de metodo).
+            if ($id === T_VARIABLE) {
+                if (!$docFound) {
                     $lineErrors[] = "Línea {$line}: La propiedad {$text} no tiene docblock.";
                 }
-                $prevTokenWasDoc = false;
+                $docFound = false;
             }
 
-            // Resetear si el token no es T_DOC_COMMENT; esto nos indica que el docblock ya fue evaluado
-            if ($id !== T_DOC_COMMENT) {
-                $prevTokenWasDoc = false;
-            }
+            // Para cualquier otro token, reseteamos el indicador
+            $docFound = false;
         }
+        $i++;
     }
 
     if (!empty($lineErrors)) {
