@@ -1,31 +1,24 @@
-#!/bin/sh
+#!/bin/bash
 
-echo "🚀 Iniciando validación de documentación en archivos modificados..."
+echo "➡️ Obteniendo archivos PHP modificados..."
 
-# Detectar archivos PHP modificados respecto a origin/main
-MODIFIED_FILES=$(git diff --cached --name-only origin/main -- '*.php')
+# Obtener archivos PHP agregados o modificados para el push
+FILES=$(git diff --cached --name-only --diff-filter=ACM | grep '\.php$')
 
-if [ -z "$MODIFIED_FILES" ]; then
-    echo "✅ No se detectaron archivos PHP modificados para validar."
+if [ -z "$FILES" ]; then
+    echo "✅ No hay archivos PHP nuevos o modificados para validar."
     exit 0
 fi
 
-echo "📄 Archivos modificados detectados:"
-echo "$MODIFIED_FILES"
+# Ejecutar script validador pasándole los archivos modificados
+echo "➡️ Validando archivos modificados..."
+php scripts/doc-validator.php $FILES
+RESULT=$?
 
-# Recorrer cada archivo modificado y validarlo con el script doc-validator.php
-for file in $MODIFIED_FILES; do
-    echo ""
-    echo "➡️ Validando $file..."
-    php scripts/doc-validator.php "$file"
-    VALID_EXIT_CODE=$?
-    if [ $VALID_EXIT_CODE -ne 0 ]; then
-        echo "❌ Errores de documentación detectados en $file. Corrige antes de hacer push."
-        exit 1
-    fi
-done
+if [ $RESULT -ne 0 ]; then
+    echo "❌ Errores de documentación detectados. Corrige antes de hacer push."
+    exit 1
+fi
 
-echo ""
-echo "✅ Todos los archivos modificados cuentan con la documentación necesaria."
-echo "🎉 Validación completada. Procediendo con el push."
+echo "✅ Validación de documentación completada correctamente."
 exit 0

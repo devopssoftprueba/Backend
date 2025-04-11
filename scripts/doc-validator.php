@@ -1,110 +1,160 @@
 <?php
 
+namespace script;
+
 /**
- * Script para validar la documentación PHPDoc en archivos PHP sin modificar la
- * documentación ya existente.
+ * Script para validar la documentación PHPDoc en declaraciones nuevas o modificadas.
  *
- * Este script escanea los archivos y verifica que las declaraciones de clases,
- * métodos y propiedades tengan un docblock inmediatamente antes (ignorando tokens
- * de espacio en blanco y comentarios en línea). Si falta el docblock, se reporta como error.
- *
- * La idea es que se ejecute en el hook pre-push para bloquear el push si algún bloque
- * nuevo o modificado carece de documentación.
- *
- * @author Ronald
- * @since  2025-04-10
+ * @category Validación
+ * @package  DocumentaciónPHPDoc
+ * @author   Ronald
+ * @version  1.0
+ * @since    2025-04-11
  */
+class PHPDocValidator
+{
+    /**
+     * Obtiene las líneas modificadas por archivo del último `git add`.
+     *
+     * @return array<string, array<int, string>> Arreglo de líneas modificadas por archivo.
+     */
+    public function getModifiedLinesByFile(): array
+    {
+        $output = [];
+        exec('git diff --cached --unified=0 --no-color', $output);
 
-if ($argc < 2) {
-    echo "Error: Debe especificarse al menos un archivo a validar.\n";
-    exit(1);
-}
+        $modified = [];
+        $currentFile = null;
 
-$errors = [];
-$filesToValidate = array_slice($argv, 1);
+        foreach ($output as $line) {
+            if (preg_match('/^\+\+\+ b\/(.+)$/', $line, $matches)) {
+                $currentFile = $matches[1];
+                continue;
+            }
 
-foreach ($filesToValidate as $filePath) {
-    if (!file_exists($filePath)) {
-        echo "Advertencia: El archivo no existe: {$filePath}\n";
-        continue;
+            if ($currentFile !== null && str_starts_with($line, '+') && !str_starts_with($line, '+++')) {
+                $modified[$currentFile][] = $line;
+            }
+        }
+
+        return $modified;
     }
 
-    $code = file_get_contents($filePath);
-    $tokens = token_get_all($code);
-    $lineErrors = []; // errores en el archivo
+    /**
+     * Valida si las líneas nuevas tienen documentación PHPDoc correspondiente.
+     *
+     * @param string $filePath      Ruta del archivo.
+     * @param array  $modifiedLines Líneas modificadas en ese archivo.
+     *
+     * @return array Errores encontrados.
+     */
+    public function validatePHPDoc(string $filePath, array $modifiedLines): array
+    {
+        $errors = [];
 
-    $docFound = false; // Indica que se encontró un docblock que puede servir para la siguiente declaración
-    $i = 0;
-    $len = count($tokens);
+        if (!file_exists($filePath)) {
+            return [];
+        }
 
-    while ($i < $len) {
-        $token = $tokens[$i];
-        if (is_array($token)) {
-            $id = $token[0];
-            $text = $token[1];
-            $line = $token[2] ?? 'desconocida';
+        $code      = file_get_contents($filePath);
+        $tokens    = token_get_all($code);
+        $lineMap   = array_flip(array_map('trim', $modifiedLines));
+        $lines     = explode("\n", $code);
+        $lineNums  = [];
 
-            // Si se encuentra un docblock, lo marcamos y avanzamos
+        foreach ($modifiedLines as $modLine) {
+            $clean = ltrim($modLine, '+');
+            foreach ($lines as $i => $line) {
+                if (trim($line) === trim($clean)) {
+                    $lineNums[] = $i + 1;
+                    break;
+                }
+            }
+        }
+
+        $prevTokenWasDoc = false;
+        $insideClass     = false;
+        $insideFunction  = false;
+
+        for ($i = 0, $len = count($tokens); $i < $len; $i++) {
+            $token = $tokens[$i];
+            if (!is_array($token)) {
+                continue;
+            }
+
+            [$id, $text, $line] = $token;
+
+            if (!in_array($line, $lineNums, true)) {
+                continue;
+            }
+
             if ($id === T_DOC_COMMENT) {
-                $docFound = true;
-                $i++;
+                $prevTokenWasDoc = true;
                 continue;
             }
 
-            // Si el token es espacio en blanco o un comentario de línea, se ignoran
-            if (in_array($id, [T_WHITESPACE, T_COMMENT])) {
-                $i++;
-                continue;
-            }
-
-            // Si encontramos una declaración de clase
             if ($id === T_CLASS) {
-                if (!$docFound) {
-                    $lineErrors[] = "Línea {$line}: La declaración de la clase no tiene docblock.";
+                if (!$prevTokenWasDoc) {
+                    $errors[] = "Línea {$line}: La clase no tiene docblock.";
                 }
-                $docFound = false;
             }
 
-            // Si encontramos una declaración de función
             if ($id === T_FUNCTION) {
-                if (!$docFound) {
-                    $lineErrors[] = "Línea {$line}: La declaración de la función no tiene docblock.";
+                if (!$prevTokenWasDoc) {
+                    $errors[] = "Línea {$line}: La función o método no tiene docblock.";
                 }
-                $docFound = false;
             }
 
-            // Si encontramos una propiedad (T_VARIABLE) en el ámbito de una clase y no dentro de una función,
-            // asumiremos que debe tener docblock.
-            // Para simplificar, no se verifica contexto exacto (ya que podría ser variable local de metodo).
-            if ($id === T_VARIABLE) {
-                if (!$docFound) {
-                    $lineErrors[] = "Línea {$line}: La propiedad {$text} no tiene docblock.";
+            if ($id === T_VARIABLE && $insideClass && !$insideFunction) {
+                if (!$prevTokenWasDoc) {
+                    $errors[] = "Línea {$line}: La propiedad {$text} no tiene docblock.";
                 }
-                $docFound = false;
             }
 
-            // Para cualquier otro token, reseteamos el indicador
-            $docFound = false;
+            $prevTokenWasDoc = false;
         }
-        $i++;
+
+        return $errors;
     }
 
-    if (!empty($lineErrors)) {
-        $errors[$filePath] = $lineErrors;
+    /**
+     * Recorre los archivos modificados y valida la documentación donde aplique.
+     *
+     * @return void
+     */
+    public function run(): void
+    {
+        $modifiedByFile = $this->getModifiedLinesByFile();
+        $hasErrors      = false;
+
+        foreach ($modifiedByFile as $file => $lines) {
+            if (!str_ends_with($file, '.php')) {
+                continue;
+            }
+
+            echo "➡️ Validando {$file}...\n";
+            $errors = $this->validatePHPDoc($file, $lines);
+
+            if (!empty($errors)) {
+                echo "❌ Errores detectados en {$file}:\n";
+                foreach ($errors as $e) {
+                    echo "  - {$e}\n";
+                }
+
+                $hasErrors = true;
+            } else {
+                echo "✅ {$file} validado correctamente.\n";
+            }
+        }
+
+        if ($hasErrors === true) {
+            echo "❌ El push fue bloqueado por errores de documentación.\n";
+            exit(1);
+        }
+
+        exit(0);
     }
 }
 
-if (!empty($errors)) {
-    echo "Errores de documentación detectados:\n";
-    foreach ($errors as $file => $errs) {
-        echo "Archivo: {$file}\n";
-        foreach ($errs as $err) {
-            echo "  - {$err}\n";
-        }
-        echo "\n";
-    }
-    exit(1);
-} else {
-    echo "Todos los archivos cuentan con la documentación necesaria.\n";
-    exit(0);
-}
+// Llamada al validador encapsulada como lógica separada (aceptada por PHPCS)
+(new PHPDocValidator())->run();
