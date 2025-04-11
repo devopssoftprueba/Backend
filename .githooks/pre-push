@@ -12,7 +12,7 @@ fi
 
 # Ejecutar script validador pasándole los archivos modificados
 echo "➡️ Validando archivos modificados..."
-php scripts/doc-validator.php $FILES
+php scripts/run-doc-validator.php $FILES
 RESULT=$?
 
 if [ $RESULT -ne 0 ]; then
