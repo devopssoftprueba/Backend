@@ -48,7 +48,7 @@ class Cliente
      *
      * Inicializa un nuevo cliente con los datos básicos.
      *
-     * @param integer $id     ID del cliente
+     * @param integer $id ID del cliente
      * @param string  $nombre Nombre del cliente
      * @param string  $email  Correo del cliente
      * @param boolean $activo Estado del cliente
