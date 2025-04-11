@@ -77,3 +77,12 @@ class Product
         return $this->price - $discount;
     }
 }
+class Producto //esta clase se agrega desde el remoto, por ende este archivo no debe generar error en el local
+{
+    private $precio;
+
+    public function getPrecio()
+    {
+        return $this->precio;
+    }
+}
