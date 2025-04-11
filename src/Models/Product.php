@@ -5,7 +5,7 @@ namespace models;
 /**
  * Class Product
  *
- * Modelo que representa un producto del sistema.
+ * Modelo que representa un producto del sistema (el comentario de este archivo lo hice el local, lo debe validar).
  *
  * @category Model
  * @package  models
@@ -39,7 +39,7 @@ class Product
     /**
      * Constructor del modelo Product.
      *
-     * @param integer $id    ID del producto.
+     * @param integer $id    ID del producto este tambien.
      * @param string  $name  Nombre del producto.
      * @param float   $price Precio del producto.
      */
