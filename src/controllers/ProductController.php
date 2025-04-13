@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace VSBackend\src\controllers;
+namespace Backend\src\controllers;
 
 use Models\Product;
 use PDO;
 use PDOException;
 
 /**
- *
+ * Controlador para gestión de productos.
  *
  * @category Controllers
  * @package  Controllers
