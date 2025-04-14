@@ -43,7 +43,7 @@ class ProductController
                     (float) $row['price']
                 );
             }
-            // Si no se encuentran productos, se devuelve un arreglo vacío
+            // Si no se encuentran productos, se devuelve un arreglo vacío hola
             return $products;
         } catch (PDOException $e) {
             return [];
