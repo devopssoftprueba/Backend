@@ -43,7 +43,6 @@ class ProductController
                     (float) $row['price']
                 );
             }
-            //retorna informacion de los productos
             return $products;
         } catch (PDOException $e) {
             return [];
