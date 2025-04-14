@@ -22,6 +22,7 @@
     <exclude name="Squiz.Functions.FunctionDeclaration" />
     <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing" />
     <exclude name="Squiz.Functions.FunctionDeclarationArgumentType" />
+    <exclude name="PSR12.Namespaces.NamespaceDeclaration.Missing" />
 
 
     <!-- Configuración -->
