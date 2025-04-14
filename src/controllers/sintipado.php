@@ -14,10 +14,10 @@ class Calculator
     /**
      * Suma dos números.
      *
-     * @param mixed $a Primer número.
-     * @param mixed $b Segundo número.
+     * @param  $a Primer número.
+     * @param  $b Segundo número.
      *
-     * @return mixed Resultado de la suma.
+     * @return  Resultado de la suma.
      */
     public function add($a, $b)
     {
