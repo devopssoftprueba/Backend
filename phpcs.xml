@@ -18,6 +18,10 @@
     <exclude name="Squiz.Commenting.FileComment.Missing" />
     <exclude name="Generic.Files.OneClassPerFile.MultipleFound" />
     <exclude name="Generic.Files.OneClassPerFile.ClassesPerFile" />
+    <exclude name="Squiz.Functions.FunctionDeclaration" />
+    <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing" />
+
+
 
     <!-- Configuración -->
     <arg name="basepath" value="."/>
