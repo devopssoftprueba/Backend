@@ -18,9 +18,10 @@
     <exclude name="Squiz.Commenting.FileComment.Missing" />
     <exclude name="Generic.Files.OneClassPerFile.MultipleFound" />
     <exclude name="Generic.Files.OneClassPerFile.ClassesPerFile" />
+    <!-- Excluir reglas de tipado en el código -->
     <exclude name="Squiz.Functions.FunctionDeclaration" />
     <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing" />
-
+    <exclude name="Squiz.Functions.FunctionDeclarationArgumentType" />
 
 
     <!-- Configuración -->
