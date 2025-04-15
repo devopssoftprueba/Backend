@@ -38,6 +38,7 @@
         <exclude name="Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps" />
         <exclude name="Squiz.NamingConventions.ValidVariableName.MemberPrefix" />
         <exclude name="Generic.Files.LineEndings.InvalidEOLChar" />
+        <exclude name="PSR12.Classes.ClassDeclaration.CloseBraceNextLine" />
     </rule>
 
     <!-- Desactivar reglas completas de camelcase -->
@@ -72,9 +73,14 @@
         <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing" />
     </rule>
 
-    <!-- Espaciado after CACTHC -->
+    <!-- Espaciado después de CATCH -->
     <rule ref="Squiz.ControlStructures.ControlSignature">
         <severity>0</severity>
+    </rule>
+
+    <!-- Desactivar línea en blanco al inicio de estructuras de control -->
+    <rule ref="Generic.ControlStructures.OpeningBraceSpace">
+        <exclude name="Generic.ControlStructures.OpeningBraceSpace.BraceOnNewLine" />
     </rule>
 
     <!-- Configuración general -->
