@@ -85,4 +85,23 @@ class UserProfile
     {
         return $this->userAge;
     }
+    /**
+     * Metodo de prueba que simula una operación con try-catch.
+     *
+     * Este metodo solo sirve para verificar que el try-catch cumple con las reglas del validador.
+     *
+     * @return void
+     */
+    public function doSomething()
+    {
+        try {
+
+            // Simulando una operación
+            $result = 10 / 2;
+        } catch (\Throwable $e) {
+            // Captura del error
+            $this->userName = 'Error';
+        }
+    }
+
 }
