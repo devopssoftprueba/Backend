@@ -40,6 +40,13 @@
         <exclude name="Squiz.Classes.ValidClassName.NotCamelCaps" />
         <exclude name="Generic.Files.LineLength" />
         <exclude name="Generic.Files.LineLength.TooLong" />
+        <!-- excluir completamente los camelcase -->
+        <exclude name="Squiz.NamingConventions.ValidFunctionName.NotCamelCaps" />
+        <exclude name="Squiz.NamingConventions.ValidVariableName.NotCamelCaps" />
+        <exclude name="Squiz.NamingConventions.ValidVariableName.PrivateNoUnderscore" />
+        <exclude name="Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps" />
+        <exclude name="Squiz.NamingConventions.ValidVariableName.MemberPrefix" />
+
     </rule>
 
     <rule ref="Generic.Commenting.DocComment" />

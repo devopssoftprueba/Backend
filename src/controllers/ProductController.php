@@ -1,52 +1,27 @@
 <?php
 
-declare(strict_types=1);
-
-namespace controllers;
-
-use Models\Product;
-use PDO;
-use PDOException;
-
-/**
- *Controlador para gestión de productos.
- *
- * @category Controllers
- * @package  Controllers
- */
-class ProductController
+class UserProfile
 {
-    /**
-     * Obtiene los productos desde la base de datos.
-     *
-     * @param PDO $pdo Conexión PDO a la base de datos.
-     *
-     * @return array Arreglo de productos.
-     */
-    public function getProducts(PDO $pdo): array
+    private string $userName;
+    private int $userAge;
+
+    public function setUserName($userName)
     {
-        try {
-            /**
-             *
-             *
-             * @lang text
-             */
-            $stmt = $pdo->query('SELECT id, name, price FROM products');
-            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $this->userName = $userName;
+    }
 
-            $products = [];
+    public function getUserName()
+    {
+        return $this->userName;
+    }
 
-            foreach ($result as $row) {
-                $products[] = new Product(
-                    (int) $row['id'],
-                    $row['name'],
-                    (float) $row['price']
-                );
-            }
+    public function setUserAge(int $userAge)
+    {
+        $this->userAge = $userAge;
+    }
 
-            return $products;
-        } catch (PDOException $e) {
-            return [];
-        }
+    public function getUserAge()
+    {
+        return $this->userAge;
     }
 }
