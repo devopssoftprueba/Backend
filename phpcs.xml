@@ -40,6 +40,11 @@
         <severity>0</severity>
     </rule>
 
+    <!-- desactivar espacios after CATCH -->
+    <rule ref="Squiz.ControlStructures.ControlSignature">
+        <severity>0</severity>
+    </rule>
+
     <!-- Excluir reglas antiguas u obsoletas -->
     <exclude name="Squiz.PHP.LowercasePHPFunctions" />
     <exclude name="Squiz.NamingConventions.ValidVariableName.PrivateNoUnderscore" />
