@@ -38,6 +38,11 @@
         <exclude name="Generic.Files.LineEndings.InvalidEOLChar" />
     </rule>
 
+    <!-- Desactivar reglas completas de camelcase -->
+    <rule ref="Squiz.NamingConventions.ValidFunctionName">
+        <severity>0</severity>
+    </rule>
+
     <!-- Reglas de comentarios y documentación -->
     <rule ref="Generic.Commenting.DocComment" />
 
