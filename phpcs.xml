@@ -24,6 +24,9 @@
     <exclude name="Squiz.Functions.FunctionDeclarationArgumentType" />
     <exclude name="PSR12.Namespaces.NamespaceDeclaration.Missing" />
 
+    <!-- ⛔️ Excluir reglas que exigen tipado en la documentación PHPDoc -->
+    <exclude name="Squiz.Commenting.FunctionComment.MissingParamType" />
+    <exclude name="Squiz.Commenting.FunctionComment.MissingReturnType" />
 
     <!-- Configuración -->
     <arg name="basepath" value="."/>
