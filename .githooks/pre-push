@@ -1,90 +1,49 @@
 #!/bin/bash
-
-# === VALIDACIÓN DE NOMBRE DE RAMA ===
+# ───────────────────────────────────────────────
+# 🔍 VALIDACIÓN DE NOMBRE DE RAMA
+# ───────────────────────────────────────────────
 # Define los patrones permitidos
-
-# Obtén el nombre de la rama actual
+branch_regex="^(feature|hotfix|bugfix)\/(VSSUP|MARKECUA|SOPECUA|RISK|STI|GEP|VSFT|BUG|GEBD|GEC|GEP|GEPC|GEPD|GER)-[0-9]{3,5}$"
+branch="^(feature|hotfix|bugfix)\/(VSSUP|MARKEKU|SOPECUA|RISK|STI|GEP|VSFT|BUG|GEBD|GEC|GEP|GEPC|GEPD|GER)-[0-9]{3,5}(-[a-zA-Z]+([A-Za-z0-9]+)*)?$"
+allowed_branches="^(enviromentdev|enviromentdevintegrations|main)$"
+# Obtiene el nombre de la rama actual
 branch_name=$(git rev-parse --abbrev-ref HEAD)
-
 # Verifica si el nombre de la rama coincide con alguno de los patrones permitidos
-
-# === VALIDACIÓN DE CÓDIGO PHP ===
-echo "🔍 Ejecutando validación PHPDoc con PHPCS (solo líneas modificadas)..."
-
-# Obtener la rama actual
-CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-BASE_BRANCH="origin/$CURRENT_BRANCH"
-
-# Flag de errores
-ERROR=0
-
-# Crear un directorio temporal para los archivos
-TEMP_DIR=$(mktemp -d)
-trap 'rm -rf "$TEMP_DIR"' EXIT
-
-# Obtener archivos PHP modificados
-FILES=$(git diff --cached --name-only "$BASE_BRANCH" | grep -E '\.php$')
-
+if [[ ! $branch_name =~ $branch_regex && ! $branch_name =~ $allowed_branches && ! $branch_name =~ $branch ]]; then
+  echo "❌ Error: El nombre de la rama '$branch_name' no cumple con el formato requerido."
+  echo "Formato requerido: [ramaTemporal]/[IDProyecto]-[CodigoWorkItem] o debe ser una de las ramas permitidas: environmentdev, environmentdevintegrations, main."
+  echo "Ejemplo válido: feature/MARKECUA-1234"
+  exit 1
+fi
+# ───────────────────────────────────────────────
+# 📄 VALIDACIÓN DE DOCUMENTACIÓN PHPDOC
+# ───────────────────────────────────────────────
+echo "🔍 Ejecutando validación PHPDoc con PHPCS..."
+# Obtener archivos PHP modificados (comparando contra el último commit en remoto)
+FILES=$(git diff --cached --name-only origin/"$branch_name" | grep -E '\.php$')
 # Si no hay archivos PHP modificados, no hacemos nada
 if [ -z "$FILES" ]; then
-    echo "✅ No hay archivos PHP modificados para validar."
-    echo "✅ Validación exitosa. Continuando con el push."
-    exit 0
+  echo "✅ No hay archivos PHP modificados para validar."
+  exit 0
 fi
-
-# Verificar cada archivo PHP modificado
+# Flag de errores
+ERROR=0
+# Verificar cada archivo PHP modificado que realmente exista
 for FILE in $FILES; do
-    if [ -f "$FILE" ]; then
-        echo "📂 Validando cambios en $FILE ..."
-
-        # Crear un archivo de parches con los cambios
-        git diff -U0 "$BASE_BRANCH" -- "$FILE" > "$TEMP_DIR/changes.patch"
-
-        # Si no hay cambios en el archivo, continuar con el siguiente
-        if [ ! -s "$TEMP_DIR/changes.patch" ]; then
-            echo "⚠️ No se detectaron cambios en $FILE"
-            continue
-        fi
-
-        # Extraer solo los números de línea modificados usando grep y awk
-        CHANGED_LINES=$(grep -E "^@@" "$TEMP_DIR/changes.patch" | awk -F' ' '{print $3}' | sed 's/+//' | awk -F, '{print $1}')
-
-        # Si no se pudieron identificar líneas cambiadas, verificar el archivo completo
-        if [ -z "$CHANGED_LINES" ]; then
-            echo "⚠️ No se pudieron determinar las líneas modificadas en $FILE, verificando archivo completo..."
-            vendor/bin/phpcs --standard=phpcs.xml "$FILE"
-            if [ $? -ne 0 ]; then
-                ERROR=1
-            fi
-            continue
-        fi
-
-        # Crear un conjunto de rangos de líneas para phpcs
-        RANGES=""
-        for LINE in $CHANGED_LINES; do
-            # Convertir el número de línea en un rango para phpcs (línea actual + 5 líneas para contexto)
-            START=$((LINE > 5 ? LINE - 5 : 1))
-            END=$((LINE + 5))
-            RANGES="$RANGES$START-$END,"
-        done
-        RANGES=${RANGES%,}  # Eliminar la última coma
-
-        # Ejecutar phpcs solo en las líneas modificadas usando --lines
-        vendor/bin/phpcs --standard=phpcs.xml --report=full --lines="$RANGES" "$FILE"
-
-        if [ $? -ne 0 ]; then
-            ERROR=1
-        fi
-    else
-        echo "⚠️ Archivo omitido (no existe): $FILE"
+  if [ -f "$FILE" ]; then
+    echo "📂 Validando $FILE ..."
+    vendor/bin/phpcs --standard=phpcs.xml "$FILE"
+    if [ $? -ne 0 ]; then
+      ERROR=1
     fi
+  else
+    echo "⚠️ Archivo omitido (no existe): $FILE"
+  fi
 done
-
 # Si hay errores, cancelar el push
 if [ $ERROR -ne 0 ]; then
-    echo "❌ Se encontraron errores en la documentación PHPDoc. Corrige antes de hacer push."
-    exit 1
+  echo "❌ Se encontraron errores en la documentación PHPDoc. Corrige antes de hacer push."
+  exit 1
 fi
-
 echo "✅ Validación exitosa. Continuando con el push."
 exit 0
