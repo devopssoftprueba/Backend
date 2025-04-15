@@ -72,6 +72,11 @@
         <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing" />
     </rule>
 
+    <!-- Espaciado after CACTHC -->
+    <rule ref="Squiz.ControlStructures.ControlSignature">
+        <severity>0</severity>
+    </rule>
+
     <!-- Configuración general -->
     <arg name="basepath" value="." />
     <config name="php_version" value="80200" />
