@@ -9,7 +9,7 @@ use PDO;
 use PDOException;
 
 /**
- * Controlador responsable de gestionar operaciones relacionadas con productos.
+ *
  *
  * @package VSBackend\src\controllers.
  * @author  Ronald.
