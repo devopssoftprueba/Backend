@@ -26,7 +26,7 @@ class calc
     }
 
     /**
-     * Resta dos números.
+     *.
      *
      * @param integer $a Primer número.
      * @param integer $b Segundo número.
@@ -36,5 +36,6 @@ class calc
     public function subtract($a, $b)
     {
         return $a - $b;
+        echo $a -$b;
     }
 }

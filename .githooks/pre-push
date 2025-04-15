@@ -1,9 +1,20 @@
 #!/bin/sh
 
-echo "🔍 Ejecutando validación PHPDoc con PHPCS..."
+echo "🔍 Ejecutando validación PHPDoc con PHPCS (solo líneas modificadas)..."
 
-# Obtener archivos PHP modificados (comparando contra el último commit en remoto)
-FILES=$(git diff --cached --name-only origin/$(git rev-parse --abbrev-ref HEAD) | grep -E '\.php$')
+# Obtener la rama actual
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+BASE_BRANCH="origin/$CURRENT_BRANCH"
+
+# Flag de errores
+ERROR=0
+
+# Crear un directorio temporal para los diffs
+TEMP_DIR=$(mktemp -d)
+trap 'rm -rf "$TEMP_DIR"' EXIT
+
+# Obtener archivos PHP modificados
+FILES=$(git diff --cached --name-only "$BASE_BRANCH" | grep -E '\.php$')
 
 # Si no hay archivos PHP modificados, no hacemos nada
 if [ -z "$FILES" ]; then
@@ -11,16 +22,21 @@ if [ -z "$FILES" ]; then
   exit 0
 fi
 
-# Flag de errores
-ERROR=0
-
-# Verificar cada archivo PHP modificado que realmente exista
 for FILE in $FILES; do
   if [ -f "$FILE" ]; then
-    echo "📂 Validando $FILE ..."
-    vendor/bin/phpcs --standard=phpcs.xml "$FILE"
+    echo "📂 Validando cambios en $FILE ..."
+
+    # Crear un archivo diff para los cambios en este archivo
+    git diff -U0 "$BASE_BRANCH" -- "$FILE" > "$TEMP_DIR/changes.diff"
+
+    # Validar solo las líneas modificadas usando phpcs con --diff
+    vendor/bin/phpcs --standard=phpcs.xml --report=diff --diff="$TEMP_DIR/changes.diff" "$FILE"
+
     if [ $? -ne 0 ]; then
       ERROR=1
+      echo "❌ Se encontraron problemas en $FILE"
+    else
+      echo "✅ $FILE pasó la validación"
     fi
   else
     echo "⚠️ Archivo omitido (no existe): $FILE"
