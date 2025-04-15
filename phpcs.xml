@@ -20,6 +20,25 @@
     <exclude name="Generic.Files.OneClassPerFile.MultipleFound" />
     <exclude name="Generic.Files.OneClassPerFile.ClassesPerFile" />
 
+    <!-- Desactivar reglas completas de camelcase -->
+    <rule ref="Squiz.NamingConventions.ValidFunctionName">
+        <severity>0</severity>
+    </rule>
+
+    <!-- Espaciado de funciones -->
+    <rule ref="Squiz.Functions">
+        <exclude name="Squiz.Functions.FunctionDeclaration.SpaceBeforeOpenParenthesis" />
+        <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing" />
+    </rule>
+
+    <!-- Desactivar límite de longitud de línea -->
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="9999" />
+            <property name="absoluteLineLimit" value="0" />
+        </properties>
+    </rule>
+
     <!-- Configuración -->
     <arg name="basepath" value="."/>
     <config name="php_version" value="80200"/>
