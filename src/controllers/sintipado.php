@@ -9,17 +9,18 @@
  * @version  1.0
  * @since    Archivo disponible desde la versión 1.0
  */
-class Calculator
+
+class calc
 {
     /**
      * Suma dos números.
      *
-     * @param integer $a primer numero.
-     * @param integer $b segundo numero.
+     * @param integer $a Primer numero.
+     * @param integer $b Segundo numero.
      *
-     * @return  Resultado de la suma.
+     * @return integer Resultado de la suma.
      */
-    public function add($a, $b)
+    private function add(int $a, int $b)
     {
         return $a + $b;
     }
@@ -27,8 +28,8 @@ class Calculator
     /**
      * Resta dos números.
      *
-     * @param mixed $a Primer número.
-     * @param mixed $b Segundo número.
+     * @param integer $a Primer número.
+     * @param integer $b Segundo número.
      *
      * @return mixed Resultado de la resta.
      */

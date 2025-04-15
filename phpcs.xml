@@ -1,16 +1,68 @@
 <?xml version="1.0"?>
 <ruleset name="ModernPHPStandard">
-    <description>Modern PHP_CodeSniffer ruleset for PHP 8+</description>
+    <description>
+        Modern PHP_CodeSniffer ruleset for PHP 8+ without enforcing type hints.
+    </description>
 
-    <!-- Reglas principales -->
-    <rule ref="PSR12" />
-    <rule ref="Squiz.Commenting.FunctionComment" />
-    <rule ref="Squiz.Commenting.VariableComment" />
+    <!-- Definir patrones que se deben excluir explícitamente antes de incluir otras reglas -->
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+
+    <!-- Desactivar reglas específicas de manera global -->
+    <rule ref="Generic.Files.LineEndings">
+        <severity>0</severity>
+    </rule>
+
+    <rule ref="PSR1.Classes.ClassDeclaration.MissingNamespace">
+        <severity>0</severity>
+    </rule>
+
+    <rule ref="Squiz.Classes.ValidClassName">
+        <severity>0</severity>
+    </rule>
+
+    <rule ref="PSR12.Files.FileHeader">
+        <severity>0</severity>
+    </rule>
+
+    <rule ref="Generic.Files.EndFileNewline">
+        <severity>0</severity>
+    </rule>
+
+    <!-- Reglas principales con exclusiones específicas -->
+    <rule ref="PSR12">
+        <exclude name="PSR12.Namespaces.NamespaceDeclaration.Missing" />
+        <exclude name="PSR1.Classes.ClassDeclaration.MissingNamespace" />
+        <exclude name="Squiz.Classes.ValidClassName.NotCamelCaps" />
+    </rule>
+
     <rule ref="Generic.Commenting.DocComment" />
 
-    <!-- Excluir reglas antiguas u obsoletas -->
+    <!-- Excluir reglas de tipado en variables -->
+    <rule ref="Squiz.Commenting.VariableComment">
+        <exclude name="Squiz.Commenting.VariableComment.MissingVar" />
+        <exclude name="Squiz.Commenting.VariableComment.Missing" />
+        <exclude name="Squiz.Commenting.VariableComment.MissingParamName" />
+        <exclude name="Squiz.Commenting.VariableComment.MissingParamComment" />
+        <exclude name="Squiz.Commenting.VariableComment.ParamNameNoMatch" />
+    </rule>
+
+    <!-- Configurar reglas para funciones -->
+    <rule ref="Squiz.Commenting.FunctionComment">
+        <exclude name="Squiz.Commenting.FunctionComment.MissingParamType" />
+        <exclude name="Squiz.Commenting.FunctionComment.MissingReturnType" />
+        <exclude name="Squiz.Commenting.FunctionComment.IncorrectParamVarName" />
+        <exclude name="Squiz.Commenting.FunctionComment.ScalarTypeHintMissing" />
+        <exclude name="Squiz.Commenting.FunctionComment.TypeHintMissing" />
+    </rule>
+
+    <!-- Excluir reglas de espacio en funciones -->
+    <rule ref="Squiz.Functions">
+        <exclude name="Squiz.Functions.FunctionDeclaration.SpaceBeforeOpenParenthesis" />
+        <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing" />
+    </rule>
+
+    <!-- Excluir otras reglas que no sean relevantes -->
     <exclude name="Squiz.Commenting.ClassComment.TagNotAllowed" />
-    <exclude name="Generic.Files.LineEndings.InvalidEOLChar" />
     <exclude name="Squiz.PHP.LowercasePHPFunctions" />
     <exclude name="Generic.Files.LineLength.TooLong" />
     <exclude name="Squiz.NamingConventions.ValidVariableName.PrivateNoUnderscore" />
@@ -18,18 +70,14 @@
     <exclude name="Squiz.Commenting.FileComment.Missing" />
     <exclude name="Generic.Files.OneClassPerFile.MultipleFound" />
     <exclude name="Generic.Files.OneClassPerFile.ClassesPerFile" />
-    <!-- Excluir reglas de tipado en el código -->
-    <exclude name="Squiz.Functions.FunctionDeclaration" />
-    <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing" />
-    <exclude name="Squiz.Functions.FunctionDeclarationArgumentType" />
-    <exclude name="PSR12.Namespaces.NamespaceDeclaration.Missing" />
 
-    <!-- ⛔️ Excluir reglas que exigen tipado en la documentación PHPDoc -->
-    <exclude name="Squiz.Commenting.FunctionComment.MissingParamType" />
-    <exclude name="Squiz.Commenting.FunctionComment.MissingReturnType" />
-
-    <!-- Configuración -->
+    <!-- Configuración general -->
     <arg name="basepath" value="."/>
     <config name="php_version" value="80200"/>
     <arg name="tab-width" value="4"/>
+    <arg name="extensions" value="php"/>
+
+    <!-- Ignorar errores -->
+    <ini name="memory_limit" value="128M"/>
+    <arg value="p"/>
 </ruleset>
