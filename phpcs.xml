@@ -78,10 +78,7 @@
         <severity>0</severity>
     </rule>
 
-    <!-- Desactivar línea en blanco al inicio de estructuras de control -->
-    <rule ref="Generic.ControlStructures.OpeningBraceSpace">
-        <exclude name="Generic.ControlStructures.OpeningBraceSpace.BraceOnNewLine" />
-    </rule>
+
 
     <!-- Configuración general -->
     <arg name="basepath" value="." />
