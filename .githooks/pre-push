@@ -1,6 +1,16 @@
-#!/bin/sh
+#!/bin/bash
 
-echo "🔍 Ejecutando validación PHPDoc con PHPCS (solo líneas modificadas)..."
+# === VALIDACIÓN DE NOMBRE DE RAMA ===
+# Define los patrones permitidos
+
+
+# Obtén el nombre de la rama actual
+branch_name=$(git rev-parse --abbrev-ref HEAD)
+
+# Verifica si el nombre de la rama coincide con alguno de los patrones permitidos
+
+# === VALIDACIÓN DE CÓDIGO PHP ===
+echo "🔍 Ejecutando validación PHPDoc con PHPCS..."
 
 # Obtener la rama actual
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
@@ -9,44 +19,43 @@ BASE_BRANCH="origin/$CURRENT_BRANCH"
 # Flag de errores
 ERROR=0
 
-# Crear un directorio temporal para los diffs
-TEMP_DIR=$(mktemp -d)
-trap 'rm -rf "$TEMP_DIR"' EXIT
-
 # Obtener archivos PHP modificados
 FILES=$(git diff --cached --name-only "$BASE_BRANCH" | grep -E '\.php$')
 
 # Si no hay archivos PHP modificados, no hacemos nada
 if [ -z "$FILES" ]; then
-  echo "✅ No hay archivos PHP modificados para validar."
-  exit 0
+    echo "✅ No hay archivos PHP modificados para validar."
+    echo "✅ Validación exitosa. Continuando con el push."
+    exit 0
 fi
 
 for FILE in $FILES; do
-  if [ -f "$FILE" ]; then
-    echo "📂 Validando cambios en $FILE ..."
+    if [ -f "$FILE" ]; then
+        echo "📂 Validando $FILE ..."
 
-    # Crear un archivo diff para los cambios en este archivo
-    git diff -U0 "$BASE_BRANCH" -- "$FILE" > "$TEMP_DIR/changes.diff"
+        # Crear un archivo diff para los cambios en este archivo
+        DIFF_OUTPUT=$(git diff -U0 "$BASE_BRANCH" -- "$FILE")
 
-    # Validar solo las líneas modificadas usando phpcs con --diff
-    vendor/bin/phpcs --standard=phpcs.xml --report=diff --diff="$TEMP_DIR/changes.diff" "$FILE"
+        if [ -z "$DIFF_OUTPUT" ]; then
+            echo "⚠️ No hay cambios detectados en $FILE"
+            continue
+        fi
 
-    if [ $? -ne 0 ]; then
-      ERROR=1
-      echo "❌ Se encontraron problemas en $FILE"
+        # Usar una tubería de comandos para enviar el diff a PHPCS
+        echo "$DIFF_OUTPUT" | vendor/bin/phpcs --standard=phpcs.xml --report=full --stdin-path="$FILE" --file-list="$FILE" --diff
+
+        if [ $? -ne 0 ]; then
+            ERROR=1
+        fi
     else
-      echo "✅ $FILE pasó la validación"
+        echo "⚠️ Archivo omitido (no existe): $FILE"
     fi
-  else
-    echo "⚠️ Archivo omitido (no existe): $FILE"
-  fi
 done
 
 # Si hay errores, cancelar el push
 if [ $ERROR -ne 0 ]; then
-  echo "❌ Se encontraron errores en la documentación PHPDoc. Corrige antes de hacer push."
-  exit 1
+    echo "❌ Se encontraron errores en la documentación PHPDoc. Corrige antes de hacer push."
+    exit 1
 fi
 
 echo "✅ Validación exitosa. Continuando con el push."
