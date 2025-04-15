@@ -4,54 +4,43 @@
         Modern PHP_CodeSniffer ruleset for PHP 8+ without enforcing type hints.
     </description>
 
-    <!-- Definir patrones que se deben excluir explícitamente antes de incluir otras reglas -->
+    <!-- Excluir vendor y otras carpetas innecesarias -->
     <exclude-pattern>*/vendor/*</exclude-pattern>
 
-    <!-- Desactivar reglas específicas de manera global -->
-    <rule ref="Generic.Files.LineEndings">
-        <severity>0</severity>
-    </rule>
+    <!-- Desactivar reglas específicas globalmente -->
+    <exclude name="PSR1.Classes.ClassDeclaration.MissingNamespace" />
+    <exclude name="PSR12.Namespaces.NamespaceDeclaration.Missing" />
+    <exclude name="Squiz.Classes.ValidClassName.NotCamelCaps" />
+    <exclude name="Squiz.NamingConventions.ValidFunctionName.NotCamelCaps" />
+    <exclude name="Squiz.NamingConventions.ValidVariableName.NotCamelCaps" />
+    <exclude name="Squiz.NamingConventions.ValidVariableName.PrivateNoUnderscore" />
+    <exclude name="Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps" />
+    <exclude name="Squiz.NamingConventions.ValidVariableName.MemberPrefix" />
+    <exclude name="Generic.Files.LineLength.TooLong" />
+    <exclude name="Squiz.PHP.LowercasePHPFunctions" />
+    <exclude name="Squiz.Classes.ClassFileName.NoMatch" />
+    <exclude name="Squiz.Commenting.FileComment.Missing" />
+    <exclude name="Generic.Files.OneClassPerFile.MultipleFound" />
+    <exclude name="Generic.Files.OneClassPerFile.ClassesPerFile" />
+    <exclude name="Squiz.Commenting.ClassComment.TagNotAllowed" />
 
-    <rule ref="PSR1.Classes.ClassDeclaration.MissingNamespace">
-        <severity>0</severity>
-    </rule>
-
-    <rule ref="Squiz.Classes.ValidClassName">
-        <severity>0</severity>
-    </rule>
-
-    <rule ref="PSR12.Files.FileHeader">
-        <severity>0</severity>
-    </rule>
-
-    <rule ref="Generic.Files.EndFileNewline">
-        <severity>0</severity>
-    </rule>
-
-    <!-- Desactivar límite de longitud de línea -->
-    <rule ref="Generic.Files.LineLength">
-        <severity>0</severity>
-    </rule>
-
-    <!-- Reglas principales con exclusiones específicas -->
+    <!-- Reglas PSR12 base, con algunas exclusiones -->
     <rule ref="PSR12">
-        <exclude name="PSR12.Namespaces.NamespaceDeclaration.Missing" />
         <exclude name="PSR1.Classes.ClassDeclaration.MissingNamespace" />
         <exclude name="Squiz.Classes.ValidClassName.NotCamelCaps" />
         <exclude name="Generic.Files.LineLength" />
         <exclude name="Generic.Files.LineLength.TooLong" />
-        <!-- excluir completamente los camelcase -->
         <exclude name="Squiz.NamingConventions.ValidFunctionName.NotCamelCaps" />
         <exclude name="Squiz.NamingConventions.ValidVariableName.NotCamelCaps" />
         <exclude name="Squiz.NamingConventions.ValidVariableName.PrivateNoUnderscore" />
         <exclude name="Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps" />
         <exclude name="Squiz.NamingConventions.ValidVariableName.MemberPrefix" />
-
     </rule>
 
+    <!-- Reglas de comentarios y documentación -->
     <rule ref="Generic.Commenting.DocComment" />
 
-    <!-- Excluir reglas de tipado en variables -->
+    <!-- Configuración para comentarios de variables -->
     <rule ref="Squiz.Commenting.VariableComment">
         <exclude name="Squiz.Commenting.VariableComment.MissingVar" />
         <exclude name="Squiz.Commenting.VariableComment.Missing" />
@@ -60,7 +49,7 @@
         <exclude name="Squiz.Commenting.VariableComment.ParamNameNoMatch" />
     </rule>
 
-    <!-- Configurar reglas para funciones -->
+    <!-- Configuración para funciones -->
     <rule ref="Squiz.Commenting.FunctionComment">
         <exclude name="Squiz.Commenting.FunctionComment.MissingParamType" />
         <exclude name="Squiz.Commenting.FunctionComment.MissingReturnType" />
@@ -69,37 +58,24 @@
         <exclude name="Squiz.Commenting.FunctionComment.TypeHintMissing" />
     </rule>
 
-    <!-- Excluir reglas de espacio en funciones -->
+    <!-- Espaciado de funciones -->
     <rule ref="Squiz.Functions">
         <exclude name="Squiz.Functions.FunctionDeclaration.SpaceBeforeOpenParenthesis" />
         <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing" />
     </rule>
 
-    <!-- Excluir otras reglas que no sean relevantes -->
-    <exclude name="Squiz.Commenting.ClassComment.TagNotAllowed" />
-    <exclude name="Squiz.PHP.LowercasePHPFunctions" />
-    <exclude name="Generic.Files.LineLength.TooLong" />
-    <exclude name="Squiz.NamingConventions.ValidVariableName.PrivateNoUnderscore" />
-    <exclude name="Squiz.Classes.ClassFileName.NoMatch" />
-    <exclude name="Squiz.Commenting.FileComment.Missing" />
-    <exclude name="Generic.Files.OneClassPerFile.MultipleFound" />
-    <exclude name="Generic.Files.OneClassPerFile.ClassesPerFile" />
-
     <!-- Configuración general -->
-    <arg name="basepath" value="."/>
-    <config name="php_version" value="80200"/>
-    <arg name="tab-width" value="4"/>
-    <arg name="extensions" value="php"/>
+    <arg name="basepath" value="." />
+    <config name="php_version" value="80200" />
+    <arg name="tab-width" value="4" />
+    <arg name="extensions" value="php" />
+    <ini name="memory_limit" value="128M" />
 
-    <!-- Ignorar errores -->
-    <ini name="memory_limit" value="128M"/>
-    <arg value="p"/>
-
-    <!-- Configurar límite de línea a un valor extremadamente alto para efectivamente deshabilitarlo -->
+    <!-- Desactivar límite de longitud de línea -->
     <rule ref="Generic.Files.LineLength">
         <properties>
-            <property name="lineLimit" value="9999"/>
-            <property name="absoluteLineLimit" value="0"/>
+            <property name="lineLimit" value="9999" />
+            <property name="absoluteLineLimit" value="0" />
         </properties>
     </rule>
 </ruleset>
