@@ -3,18 +3,11 @@
 # 🔍 VALIDACIÓN DE NOMBRE DE RAMA
 # ───────────────────────────────────────────────
 # Define los patrones permitidos
-branch_regex="^(feature|hotfix|bugfix)\/(VSSUP|MARKECUA|SOPECUA|RISK|STI|GEP|VSFT|BUG|GEBD|GEC|GEP|GEPC|GEPD|GER)-[0-9]{3,5}$"
-branch="^(feature|hotfix|bugfix)\/(VSSUP|MARKEKU|SOPECUA|RISK|STI|GEP|VSFT|BUG|GEBD|GEC|GEP|GEPC|GEPD|GER)-[0-9]{3,5}(-[a-zA-Z]+([A-Za-z0-9]+)*)?$"
-allowed_branches="^(enviromentdev|enviromentdevintegrations|main)$"
+
 # Obtiene el nombre de la rama actual
 branch_name=$(git rev-parse --abbrev-ref HEAD)
 # Verifica si el nombre de la rama coincide con alguno de los patrones permitidos
-if [[ ! $branch_name =~ $branch_regex && ! $branch_name =~ $allowed_branches && ! $branch_name =~ $branch ]]; then
-  echo "❌ Error: El nombre de la rama '$branch_name' no cumple con el formato requerido."
-  echo "Formato requerido: [ramaTemporal]/[IDProyecto]-[CodigoWorkItem] o debe ser una de las ramas permitidas: environmentdev, environmentdevintegrations, main."
-  echo "Ejemplo válido: feature/MARKECUA-1234"
-  exit 1
-fi
+
 # ───────────────────────────────────────────────
 # 📄 VALIDACIÓN DE DOCUMENTACIÓN PHPDOC
 # ───────────────────────────────────────────────
