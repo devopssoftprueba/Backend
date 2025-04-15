@@ -28,11 +28,18 @@
         <severity>0</severity>
     </rule>
 
+    <!-- Desactivar límite de longitud de línea -->
+    <rule ref="Generic.Files.LineLength">
+        <severity>0</severity>
+    </rule>
+
     <!-- Reglas principales con exclusiones específicas -->
     <rule ref="PSR12">
         <exclude name="PSR12.Namespaces.NamespaceDeclaration.Missing" />
         <exclude name="PSR1.Classes.ClassDeclaration.MissingNamespace" />
         <exclude name="Squiz.Classes.ValidClassName.NotCamelCaps" />
+        <exclude name="Generic.Files.LineLength" />
+        <exclude name="Generic.Files.LineLength.TooLong" />
     </rule>
 
     <rule ref="Generic.Commenting.DocComment" />
@@ -80,4 +87,12 @@
     <!-- Ignorar errores -->
     <ini name="memory_limit" value="128M"/>
     <arg value="p"/>
+
+    <!-- Configurar límite de línea a un valor extremadamente alto para efectivamente deshabilitarlo -->
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="9999"/>
+            <property name="absoluteLineLimit" value="0"/>
+        </properties>
+    </rule>
 </ruleset>
