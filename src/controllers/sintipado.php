@@ -14,8 +14,8 @@ class Calculator
     /**
      * Suma dos números.
      *
-     * @param  $a Primer número.
-     * @param  $b Segundo número.
+     * @param integer $a primer numero.
+     * @param integer $b segundo numero.
      *
      * @return  Resultado de la suma.
      */
