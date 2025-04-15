@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Backend\src\controllers;
+namespace controllers;
 
 use Models\Product;
 use PDO;
@@ -27,7 +27,7 @@ class ProductController
     {
         try {
             /**
-             * Consulta SQL para obtener productos.
+             *
              *
              * @lang text
              */
