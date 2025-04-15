@@ -26,11 +26,7 @@ class ProductController
     public function getProducts(PDO $pdo): array
     {
         try {
-            /**
-             * Consulta SQL para obtener productos.
-             *
-             * @lang text
-             */
+
             $stmt = $pdo->query('SELECT id, name, price FROM products');
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
