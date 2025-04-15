@@ -20,7 +20,7 @@ for FILE in $FILES; do
   # Verificar si el archivo aun existe en el sistema de archivos
   if [ -f "$FILE" ]; then
     echo "📂 Validando $FILE ..."
-    vendor/bin/phpcs --sniffs=Squiz.Commenting.FunctionComment,Squiz.Commenting.VariableComment,Generic.Commenting.DocComment "$FILE"
+    vendor/bin/phpcs --standard=phpcs.xml "$FILE"
     # Evaluar el codigo de salida del comando anterior
     if [ $? -ne 0 ]; then
       ERROR=1
