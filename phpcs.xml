@@ -27,6 +27,7 @@
 
     <!-- Reglas PSR12 base, con algunas exclusiones -->
     <rule ref="PSR12">
+        <exclude name="PSR1.Methods.CamelCapsMethodName.NotCamelCaps" />
         <exclude name="PSR1.Classes.ClassDeclaration.MissingNamespace" />
         <exclude name="Squiz.Classes.ValidClassName.NotCamelCaps" />
         <exclude name="Generic.Files.LineLength" />
