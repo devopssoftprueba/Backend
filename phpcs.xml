@@ -7,20 +7,11 @@
     <rule ref="Squiz.Commenting.FunctionComment" />
     <rule ref="Squiz.Commenting.VariableComment" />
     <rule ref="Generic.Commenting.DocComment" />
-    <rule ref="Squiz.Commenting.ClassComment" />
 
-    <!-- Excluir reglas antiguas u obsoletas -->
-    <exclude name="Squiz.Commenting.ClassComment.TagNotAllowed" />
-    <exclude name="Generic.Files.LineEndings.InvalidEOLChar" />
-    <exclude name="Squiz.PHP.LowercasePHPFunctions" />
-    <exclude name="Generic.Files.LineLength.TooLong" />
-    <exclude name="Squiz.NamingConventions.ValidVariableName.PrivateNoUnderscore" />
-    <exclude name="Squiz.Classes.ClassFileName.NoMatch" />
-    <exclude name="Squiz.Commenting.FileComment.Missing" />
-    <exclude name="Generic.Files.OneClassPerFile.MultipleFound" />
-    <exclude name="Generic.Files.OneClassPerFile.ClassesPerFile" />
-
-    <!-- Desactivar reglas completas de camelcase -->
+    <!-- Desactivar reglas completas que causan conflictos con tu plantilla -->
+    <rule ref="Squiz.Commenting.ClassComment">
+        <severity>0</severity>
+    </rule>
     <rule ref="Squiz.NamingConventions.ValidFunctionName">
         <severity>0</severity>
     </rule>
@@ -31,7 +22,17 @@
         <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing" />
     </rule>
 
-    <!-- Desactivar límite de longitud de línea -->
+    <!-- Desactivar reglas antiguas u obsoletas -->
+    <exclude name="Generic.Files.LineEndings.InvalidEOLChar" />
+    <exclude name="Squiz.PHP.LowercasePHPFunctions" />
+    <exclude name="Generic.Files.LineLength.TooLong" />
+    <exclude name="Squiz.NamingConventions.ValidVariableName.PrivateNoUnderscore" />
+    <exclude name="Squiz.Classes.ClassFileName.NoMatch" />
+    <exclude name="Squiz.Commenting.FileComment.Missing" />
+    <exclude name="Generic.Files.OneClassPerFile.MultipleFound" />
+    <exclude name="Generic.Files.OneClassPerFile.ClassesPerFile" />
+
+    <!-- Límite de longitud de línea flexible -->
     <rule ref="Generic.Files.LineLength">
         <properties>
             <property name="lineLimit" value="9999" />

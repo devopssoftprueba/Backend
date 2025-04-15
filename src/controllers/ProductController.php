@@ -11,11 +11,10 @@ use PDOException;
 /**
  * Controlador responsable de gestionar operaciones relacionadas con productos.
  *
- * @category Controllers
- * @package  VSBackend\src\controllers
- * @author   Ronald
- * @version  1.0
- * @since    1.0
+ * @package VSBackend\src\controllers.
+ * @author  Ronald.
+ * @version 1.0.
+ * @since   1.0.
  */
 class ProductController
 {
