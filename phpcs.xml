@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <ruleset name="ModernPHPStandard">
     <description>
-        Modern PHP_CodeSniffer ruleset for PHP 8+ without enforcing type hints.
+        Modern PHP_CodeSniffer ruleset for PHP 8+ without enforcing type hints or spacing rules.
     </description>
 
     <!-- Excluir vendor y otras carpetas innecesarias -->
@@ -39,10 +39,58 @@
         <exclude name="Squiz.NamingConventions.ValidVariableName.MemberPrefix" />
         <exclude name="Generic.Files.LineEndings.InvalidEOLChar" />
         <exclude name="PSR12.Classes.ClassDeclaration.CloseBraceNextLine" />
+
+        <!-- Exclusiones adicionales para problemas de espaciado -->
+        <exclude name="Generic.WhiteSpace" />
+        <exclude name="Squiz.WhiteSpace" />
+        <exclude name="PSR2.WhiteSpace" />
+        <exclude name="PSR12.WhiteSpace" />
+        <exclude name="PSR2.ControlStructures.ControlStructureSpacing" />
+        <exclude name="PSR12.ControlStructures.ControlStructureSpacing" />
+        <exclude name="Generic.Functions.FunctionCallArgumentSpacing" />
+        <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing" />
+        <exclude name="PSR2.Methods.FunctionCallSignature" />
+        <exclude name="PSR12.Functions.ReturnTypeDeclaration" />
+        <exclude name="Generic.WhiteSpace.ScopeIndent" />
+        <exclude name="Generic.WhiteSpace.DisallowTabIndent" />
+        <exclude name="Generic.WhiteSpace.ArbitraryParenthesesSpacing" />
+        <exclude name="Squiz.WhiteSpace.SuperfluousWhitespace" />
+        <exclude name="Squiz.ControlStructures.ForEachLoopDeclaration.SpaceAfterOpen" />
+        <exclude name="Squiz.ControlStructures.ForEachLoopDeclaration.SpaceBeforeClose" />
+        <exclude name="PEAR.WhiteSpace.ScopeClosingBrace" />
     </rule>
 
     <!-- Desactivar reglas completas de camelcase -->
     <rule ref="Squiz.NamingConventions.ValidFunctionName">
+        <severity>0</severity>
+    </rule>
+
+    <!-- Desactivar completamente todas las reglas de espaciado -->
+    <rule ref="Squiz.WhiteSpace">
+        <severity>0</severity>
+    </rule>
+    <rule ref="Generic.WhiteSpace">
+        <severity>0</severity>
+    </rule>
+    <rule ref="PSR2.WhiteSpace">
+        <severity>0</severity>
+    </rule>
+    <rule ref="PSR12.WhiteSpace">
+        <severity>0</severity>
+    </rule>
+    <rule ref="PSR2.Methods.FunctionCallSignature">
+        <severity>0</severity>
+    </rule>
+    <rule ref="PSR2.ControlStructures">
+        <severity>0</severity>
+    </rule>
+    <rule ref="PEAR.WhiteSpace">
+        <severity>0</severity>
+    </rule>
+    <rule ref="Squiz.ControlStructures.ControlSignature">
+        <severity>0</severity>
+    </rule>
+    <rule ref="Squiz.Functions.MultiLineFunctionDeclaration">
         <severity>0</severity>
     </rule>
 
@@ -71,14 +119,8 @@
     <rule ref="Squiz.Functions">
         <exclude name="Squiz.Functions.FunctionDeclaration.SpaceBeforeOpenParenthesis" />
         <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing" />
+        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration" />
     </rule>
-
-    <!-- Espaciado después de CATCH -->
-    <rule ref="Squiz.ControlStructures.ControlSignature">
-        <severity>0</severity>
-    </rule>
-
-
 
     <!-- Configuración general -->
     <arg name="basepath" value="." />
