@@ -1,16 +1,20 @@
 <?xml version="1.0"?>
 <ruleset name="DocStandard">
     <description>
-        PHP_CodeSniffer ruleset enfocado en documentación PHPDoc sin errores de formato
+        PHP_CodeSniffer ruleset enfocado en validación de PHPDoc exclusivamente, sin reglas de formateo de código.
     </description>
 
     <!-- Excluir vendor y otras carpetas innecesarias -->
     <exclude-pattern>*/vendor/*</exclude-pattern>
 
-    <!-- Activar reglas relacionadas con comentarios y PHPDoc -->
+    <!-- Incluir solo las reglas relacionadas con PHPDoc -->
+
+    <!-- Valida los bloques generales de PHPDoc -->
     <rule ref="Generic.Commenting.DocComment" />
 
+    <!-- Valida la documentación de funciones -->
     <rule ref="Squiz.Commenting.FunctionComment">
+        <!-- No forzar tipos si no lo deseas -->
         <exclude name="Squiz.Commenting.FunctionComment.MissingParamType" />
         <exclude name="Squiz.Commenting.FunctionComment.MissingReturnType" />
         <exclude name="Squiz.Commenting.FunctionComment.IncorrectParamVarName" />
@@ -18,10 +22,13 @@
         <exclude name="Squiz.Commenting.FunctionComment.TypeHintMissing" />
     </rule>
 
+    <!-- Valida la documentación en clases -->
     <rule ref="Squiz.Commenting.ClassComment">
+        <!-- Permitir etiquetas personalizadas como @category, @package, etc. -->
         <exclude name="Squiz.Commenting.ClassComment.TagNotAllowed" />
     </rule>
 
+    <!-- Valida la documentación de variables -->
     <rule ref="Squiz.Commenting.VariableComment">
         <exclude name="Squiz.Commenting.VariableComment.MissingVar" />
         <exclude name="Squiz.Commenting.VariableComment.Missing" />
@@ -29,22 +36,6 @@
         <exclude name="Squiz.Commenting.VariableComment.MissingParamComment" />
         <exclude name="Squiz.Commenting.VariableComment.ParamNameNoMatch" />
     </rule>
-
-    <!-- Desactivar todas las reglas de formato y estructuras -->
-    <rule ref="Generic.ControlStructures" severity="0"/>
-    <rule ref="Squiz.ControlStructures" severity="0"/>
-    <rule ref="PEAR.ControlStructures" severity="0"/>
-
-    <rule ref="Squiz.WhiteSpace" severity="0"/>
-    <rule ref="Generic.WhiteSpace" severity="0"/>
-    <rule ref="PEAR.WhiteSpace" severity="0"/>
-
-    <rule ref="Generic.Formatting" severity="0"/>
-    <rule ref="PEAR.Formatting" severity="0"/>
-    <rule ref="Squiz.Formatting" severity="0"/>
-
-    <rule ref="Generic.Functions" severity="0"/>
-    <rule ref="PEAR.Functions" severity="0"/>
 
     <!-- Configuración general -->
     <arg name="basepath" value="." />
