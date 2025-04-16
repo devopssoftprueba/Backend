@@ -40,24 +40,23 @@
         <exclude name="Generic.Files.LineEndings.InvalidEOLChar" />
         <exclude name="PSR12.Classes.ClassDeclaration.CloseBraceNextLine" />
 
-        <!-- Exclusiones adicionales para problemas de espaciado -->
-        <exclude name="Generic.WhiteSpace" />
-        <exclude name="Squiz.WhiteSpace" />
-        <exclude name="PSR2.WhiteSpace" />
-        <exclude name="PSR12.WhiteSpace" />
-        <exclude name="PSR2.ControlStructures.ControlStructureSpacing" />
-        <exclude name="PSR12.ControlStructures.ControlStructureSpacing" />
-        <exclude name="Generic.Functions.FunctionCallArgumentSpacing" />
-        <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing" />
-        <exclude name="PSR2.Methods.FunctionCallSignature" />
-        <exclude name="PSR12.Functions.ReturnTypeDeclaration" />
-        <exclude name="Generic.WhiteSpace.ScopeIndent" />
+        <!-- Exclusiones específicas para problemas de espaciado -->
         <exclude name="Generic.WhiteSpace.DisallowTabIndent" />
+        <exclude name="Generic.WhiteSpace.ScopeIndent" />
         <exclude name="Generic.WhiteSpace.ArbitraryParenthesesSpacing" />
+        <exclude name="Generic.Functions.FunctionCallArgumentSpacing" />
         <exclude name="Squiz.WhiteSpace.SuperfluousWhitespace" />
+        <exclude name="Squiz.WhiteSpace.OperatorSpacing" />
+        <exclude name="Squiz.WhiteSpace.ScopeClosingBrace" />
+        <exclude name="Squiz.WhiteSpace.ScopeKeywordSpacing" />
+        <exclude name="Squiz.WhiteSpace.ControlStructureSpacing" />
+        <exclude name="PSR2.ControlStructures.ControlStructureSpacing" />
+        <exclude name="PSR2.Methods.FunctionCallSignature" />
+        <exclude name="PSR12.ControlStructures.ControlStructureSpacing" />
         <exclude name="Squiz.ControlStructures.ForEachLoopDeclaration.SpaceAfterOpen" />
         <exclude name="Squiz.ControlStructures.ForEachLoopDeclaration.SpaceBeforeClose" />
         <exclude name="PEAR.WhiteSpace.ScopeClosingBrace" />
+        <exclude name="PEAR.Functions.FunctionCallSignature" />
     </rule>
 
     <!-- Desactivar reglas completas de camelcase -->
@@ -65,32 +64,47 @@
         <severity>0</severity>
     </rule>
 
-    <!-- Desactivar completamente todas las reglas de espaciado -->
-    <rule ref="Squiz.WhiteSpace">
+    <!-- Desactivar completamente todas las reglas de espaciado específicas -->
+    <rule ref="Squiz.WhiteSpace.SuperfluousWhitespace">
         <severity>0</severity>
     </rule>
-    <rule ref="Generic.WhiteSpace">
+    <rule ref="Squiz.WhiteSpace.OperatorSpacing">
         <severity>0</severity>
     </rule>
-    <rule ref="PSR2.WhiteSpace">
+    <rule ref="Squiz.WhiteSpace.ScopeClosingBrace">
         <severity>0</severity>
     </rule>
-    <rule ref="PSR12.WhiteSpace">
+    <rule ref="Squiz.WhiteSpace.ScopeKeywordSpacing">
+        <severity>0</severity>
+    </rule>
+    <rule ref="Squiz.WhiteSpace.ControlStructureSpacing">
+        <severity>0</severity>
+    </rule>
+    <rule ref="Generic.WhiteSpace.DisallowTabIndent">
+        <severity>0</severity>
+    </rule>
+    <rule ref="Generic.WhiteSpace.ScopeIndent">
         <severity>0</severity>
     </rule>
     <rule ref="PSR2.Methods.FunctionCallSignature">
         <severity>0</severity>
     </rule>
-    <rule ref="PSR2.ControlStructures">
+    <rule ref="PSR2.ControlStructures.ControlStructureSpacing">
         <severity>0</severity>
     </rule>
-    <rule ref="PEAR.WhiteSpace">
+    <rule ref="PEAR.WhiteSpace.ScopeClosingBrace">
+        <severity>0</severity>
+    </rule>
+    <rule ref="PEAR.Functions.FunctionCallSignature">
         <severity>0</severity>
     </rule>
     <rule ref="Squiz.ControlStructures.ControlSignature">
         <severity>0</severity>
     </rule>
     <rule ref="Squiz.Functions.MultiLineFunctionDeclaration">
+        <severity>0</severity>
+    </rule>
+    <rule ref="PSR12.ControlStructures.ControlStructureSpacing">
         <severity>0</severity>
     </rule>
 
