@@ -1,117 +1,34 @@
 <?xml version="1.0"?>
-<ruleset name="ModernPHPStandard">
+<ruleset name="PHPDocStandard">
     <description>
-        Modern PHP_CodeSniffer ruleset for PHP 8+ without enforcing type hints or spacing rules.
+        PHP_CodeSniffer ruleset enfocado exclusivamente en documentación PHPDoc sin validar formato de código
     </description>
 
     <!-- Excluir vendor y otras carpetas innecesarias -->
     <exclude-pattern>*/vendor/*</exclude-pattern>
 
-    <!-- Desactivar reglas específicas globalmente -->
-    <exclude name="PSR1.Methods.CamelCapsMethodName.NotCamelCaps" />
-    <exclude name="PSR1.Classes.ClassDeclaration.MissingNamespace" />
-    <exclude name="PSR12.Namespaces.NamespaceDeclaration.Missing" />
-    <exclude name="Squiz.Classes.ValidClassName.NotCamelCaps" />
-    <exclude name="Squiz.NamingConventions.ValidFunctionName.NotCamelCaps" />
-    <exclude name="Squiz.NamingConventions.ValidVariableName.NotCamelCaps" />
-    <exclude name="Squiz.NamingConventions.ValidVariableName.PrivateNoUnderscore" />
-    <exclude name="Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps" />
-    <exclude name="Squiz.NamingConventions.ValidVariableName.MemberPrefix" />
-    <exclude name="Generic.Files.LineLength.TooLong" />
-    <exclude name="Squiz.PHP.LowercasePHPFunctions" />
-    <exclude name="Squiz.Classes.ClassFileName.NoMatch" />
-    <exclude name="Squiz.Commenting.FileComment.Missing" />
-    <exclude name="Generic.Files.OneClassPerFile.MultipleFound" />
-    <exclude name="Generic.Files.OneClassPerFile.ClassesPerFile" />
-    <exclude name="Squiz.Commenting.ClassComment.TagNotAllowed" />
-
-    <!-- Reglas PSR12 base, con algunas exclusiones -->
+    <!-- Desactivar todas las reglas de código -->
     <rule ref="PSR12">
-        <exclude name="PSR1.Methods.CamelCapsMethodName.NotCamelCaps" />
-        <exclude name="PSR1.Classes.ClassDeclaration.MissingNamespace" />
-        <exclude name="Squiz.Classes.ValidClassName.NotCamelCaps" />
-        <exclude name="Generic.Files.LineLength" />
-        <exclude name="Generic.Files.LineLength.TooLong" />
-        <exclude name="Squiz.NamingConventions.ValidFunctionName.NotCamelCaps" />
-        <exclude name="Squiz.NamingConventions.ValidVariableName.NotCamelCaps" />
-        <exclude name="Squiz.NamingConventions.ValidVariableName.PrivateNoUnderscore" />
-        <exclude name="Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps" />
-        <exclude name="Squiz.NamingConventions.ValidVariableName.MemberPrefix" />
-        <exclude name="Generic.Files.LineEndings.InvalidEOLChar" />
-        <exclude name="PSR12.Classes.ClassDeclaration.CloseBraceNextLine" />
-
-        <!-- Exclusiones específicas para problemas de espaciado -->
-        <exclude name="Generic.WhiteSpace.DisallowTabIndent" />
-        <exclude name="Generic.WhiteSpace.ScopeIndent" />
-        <exclude name="Generic.WhiteSpace.ArbitraryParenthesesSpacing" />
-        <exclude name="Generic.Functions.FunctionCallArgumentSpacing" />
-        <exclude name="Squiz.WhiteSpace.SuperfluousWhitespace" />
-        <exclude name="Squiz.WhiteSpace.OperatorSpacing" />
-        <exclude name="Squiz.WhiteSpace.ScopeClosingBrace" />
-        <exclude name="Squiz.WhiteSpace.ScopeKeywordSpacing" />
-        <exclude name="Squiz.WhiteSpace.ControlStructureSpacing" />
-        <exclude name="PSR2.ControlStructures.ControlStructureSpacing" />
-        <exclude name="PSR2.Methods.FunctionCallSignature" />
-        <exclude name="PSR12.ControlStructures.ControlStructureSpacing" />
-        <exclude name="Squiz.ControlStructures.ForEachLoopDeclaration.SpaceAfterOpen" />
-        <exclude name="Squiz.ControlStructures.ForEachLoopDeclaration.SpaceBeforeClose" />
-        <exclude name="PEAR.WhiteSpace.ScopeClosingBrace" />
-        <exclude name="PEAR.Functions.FunctionCallSignature" />
-    </rule>
-
-    <!-- Desactivar reglas completas de camelcase -->
-    <rule ref="Squiz.NamingConventions.ValidFunctionName">
+        <!-- Desactivar todas las reglas relacionadas con el código -->
         <severity>0</severity>
     </rule>
 
-    <!-- Desactivar completamente todas las reglas de espaciado específicas -->
-    <rule ref="Squiz.WhiteSpace.SuperfluousWhitespace">
-        <severity>0</severity>
-    </rule>
-    <rule ref="Squiz.WhiteSpace.OperatorSpacing">
-        <severity>0</severity>
-    </rule>
-    <rule ref="Squiz.WhiteSpace.ScopeClosingBrace">
-        <severity>0</severity>
-    </rule>
-    <rule ref="Squiz.WhiteSpace.ScopeKeywordSpacing">
-        <severity>0</severity>
-    </rule>
-    <rule ref="Squiz.WhiteSpace.ControlStructureSpacing">
-        <severity>0</severity>
-    </rule>
-    <rule ref="Generic.WhiteSpace.DisallowTabIndent">
-        <severity>0</severity>
-    </rule>
-    <rule ref="Generic.WhiteSpace.ScopeIndent">
-        <severity>0</severity>
-    </rule>
-    <rule ref="PSR2.Methods.FunctionCallSignature">
-        <severity>0</severity>
-    </rule>
-    <rule ref="PSR2.ControlStructures.ControlStructureSpacing">
-        <severity>0</severity>
-    </rule>
-    <rule ref="PEAR.WhiteSpace.ScopeClosingBrace">
-        <severity>0</severity>
-    </rule>
-    <rule ref="PEAR.Functions.FunctionCallSignature">
-        <severity>0</severity>
-    </rule>
-    <rule ref="Squiz.ControlStructures.ControlSignature">
-        <severity>0</severity>
-    </rule>
-    <rule ref="Squiz.Functions.MultiLineFunctionDeclaration">
-        <severity>0</severity>
-    </rule>
-    <rule ref="PSR12.ControlStructures.ControlStructureSpacing">
-        <severity>0</severity>
+    <!-- Activar solo reglas de documentación -->
+    <rule ref="Generic.Commenting.DocComment">
+        <!-- Mantener todas las reglas sobre formato básico de doc -->
     </rule>
 
-    <!-- Reglas de comentarios y documentación -->
-    <rule ref="Generic.Commenting.DocComment" />
+    <!-- Comentarios de funciones -->
+    <rule ref="Squiz.Commenting.FunctionComment">
+        <!-- Mantener las exclusiones existentes -->
+        <exclude name="Squiz.Commenting.FunctionComment.MissingParamType" />
+        <exclude name="Squiz.Commenting.FunctionComment.MissingReturnType" />
+        <exclude name="Squiz.Commenting.FunctionComment.IncorrectParamVarName" />
+        <exclude name="Squiz.Commenting.FunctionComment.ScalarTypeHintMissing" />
+        <exclude name="Squiz.Commenting.FunctionComment.TypeHintMissing" />
+    </rule>
 
-    <!-- Configuración para comentarios de variables -->
+    <!-- Comentarios de variables -->
     <rule ref="Squiz.Commenting.VariableComment">
         <exclude name="Squiz.Commenting.VariableComment.MissingVar" />
         <exclude name="Squiz.Commenting.VariableComment.Missing" />
@@ -120,20 +37,80 @@
         <exclude name="Squiz.Commenting.VariableComment.ParamNameNoMatch" />
     </rule>
 
-    <!-- Configuración para funciones -->
-    <rule ref="Squiz.Commenting.FunctionComment">
-        <exclude name="Squiz.Commenting.FunctionComment.MissingParamType" />
-        <exclude name="Squiz.Commenting.FunctionComment.MissingReturnType" />
-        <exclude name="Squiz.Commenting.FunctionComment.IncorrectParamVarName" />
-        <exclude name="Squiz.Commenting.FunctionComment.ScalarTypeHintMissing" />
-        <exclude name="Squiz.Commenting.FunctionComment.TypeHintMissing" />
+    <!-- Comentarios de clases -->
+    <rule ref="Squiz.Commenting.ClassComment">
+        <exclude name="Squiz.Commenting.ClassComment.TagNotAllowed" />
     </rule>
 
-    <!-- Espaciado de funciones -->
+    <!-- Desactivar explícitamente todas las reglas no relacionadas con documentación -->
+    <rule ref="Generic.WhiteSpace">
+        <severity>0</severity>
+    </rule>
+    <rule ref="Squiz.WhiteSpace">
+        <severity>0</severity>
+    </rule>
+    <rule ref="PSR2.Methods">
+        <severity>0</severity>
+    </rule>
+    <rule ref="PSR2.Classes">
+        <severity>0</severity>
+    </rule>
+    <rule ref="PSR2.ControlStructures">
+        <severity>0</severity>
+    </rule>
+    <rule ref="PSR2.Files">
+        <severity>0</severity>
+    </rule>
+    <rule ref="PSR12.Classes">
+        <severity>0</severity>
+    </rule>
+    <rule ref="PSR12.ControlStructures">
+        <severity>0</severity>
+    </rule>
+    <rule ref="PSR12.Files">
+        <severity>0</severity>
+    </rule>
+    <rule ref="PSR12.Functions">
+        <severity>0</severity>
+    </rule>
     <rule ref="Squiz.Functions">
-        <exclude name="Squiz.Functions.FunctionDeclaration.SpaceBeforeOpenParenthesis" />
-        <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing" />
-        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration" />
+        <severity>0</severity>
+    </rule>
+    <rule ref="Squiz.Classes">
+        <severity>0</severity>
+    </rule>
+    <rule ref="Squiz.ControlStructures">
+        <severity>0</severity>
+    </rule>
+    <rule ref="Squiz.Operators">
+        <severity>0</severity>
+    </rule>
+    <rule ref="Squiz.Scope">
+        <severity>0</severity>
+    </rule>
+    <rule ref="Generic.Functions">
+        <severity>0</severity>
+    </rule>
+    <rule ref="Generic.Classes">
+        <severity>0</severity>
+    </rule>
+    <rule ref="Generic.ControlStructures">
+        <severity>0</severity>
+    </rule>
+    <rule ref="Generic.Files">
+        <severity>0</severity>
+    </rule>
+    <rule ref="Generic.Formatting">
+        <severity>0</severity>
+    </rule>
+    <rule ref="Generic.NamingConventions">
+        <severity>0</severity>
+    </rule>
+    <rule ref="PEAR.Functions">
+        <severity>0</severity>
+    </rule>
+    <rule ref="PEAR.WhiteSpace">
+        <severity>0</severity>
     </rule>
 
     <!-- Configuración general -->
@@ -142,12 +119,4 @@
     <arg name="tab-width" value="4" />
     <arg name="extensions" value="php" />
     <ini name="memory_limit" value="128M" />
-
-    <!-- Desactivar límite de longitud de línea -->
-    <rule ref="Generic.Files.LineLength">
-        <properties>
-            <property name="lineLimit" value="9999" />
-            <property name="absoluteLineLimit" value="0" />
-        </properties>
-    </rule>
 </ruleset>
