@@ -1,122 +1,109 @@
 <?xml version="1.0"?>
-<ruleset name="PHPDocStandard">
+<ruleset name="PHPDocOnly">
     <description>
-        PHP_CodeSniffer ruleset enfocado exclusivamente en documentación PHPDoc sin validar formato de código
+        validacion solo de la documentacion
     </description>
 
     <!-- Excluir vendor y otras carpetas innecesarias -->
     <exclude-pattern>*/vendor/*</exclude-pattern>
 
-    <!-- Desactivar todas las reglas de código -->
+    <!-- IMPORTANTE: Desactivar TODAS las reglas por defecto -->
     <rule ref="PSR12">
-        <!-- Desactivar todas las reglas relacionadas con el código -->
+        <exclude name="PSR12" />
+    </rule>
+    <rule ref="PSR1">
+        <exclude name="PSR1" />
+    </rule>
+    <rule ref="PSR2">
+        <exclude name="PSR2" />
+    </rule>
+    <rule ref="PEAR">
+        <exclude name="PEAR" />
+    </rule>
+    <rule ref="Squiz">
+        <exclude name="Squiz" />
+    </rule>
+    <rule ref="Generic">
+        <exclude name="Generic" />
+    </rule>
+    <rule ref="Zend">
+        <exclude name="Zend" />
+    </rule>
+
+    <!-- Activar SOLO las reglas específicas de documentación necesarias -->
+    <rule ref="Generic.Commenting.DocComment.MissingShort">
+        <severity>5</severity>
+    </rule>
+    <rule ref="Generic.Commenting.DocComment.SpacingBeforeTags">
+        <severity>5</severity>
+    </rule>
+    <rule ref="Generic.Commenting.DocComment.TagValueIndent">
+        <severity>5</severity>
+    </rule>
+    <rule ref="Generic.Commenting.DocComment.NonParamGroup">
+        <severity>5</severity>
+    </rule>
+    <rule ref="Generic.Commenting.DocComment.ParamNotFirst">
+        <severity>5</severity>
+    </rule>
+
+    <!-- Reglas específicas para docblocks de funciones -->
+    <rule ref="Squiz.Commenting.FunctionComment.Missing">
+        <severity>5</severity>
+    </rule>
+    <rule ref="Squiz.Commenting.FunctionComment.MissingParamTag">
+        <severity>5</severity>
+    </rule>
+    <rule ref="Squiz.Commenting.FunctionComment.MissingParamComment">
+        <severity>5</severity>
+    </rule>
+    <rule ref="Squiz.Commenting.FunctionComment.SpacingAfterParamType">
+        <severity>5</severity>
+    </rule>
+    <rule ref="Squiz.Commenting.FunctionComment.SpacingAfterParamName">
+        <severity>5</severity>
+    </rule>
+    <rule ref="Squiz.Commenting.FunctionComment.ParamCommentFullStop">
+        <severity>5</severity>
+    </rule>
+    <rule ref="Squiz.Commenting.FunctionComment.ParamCommentNotCapital">
+        <severity>5</severity>
+    </rule>
+    <rule ref="Squiz.Commenting.FunctionComment.EmptyThrows">
+        <severity>5</severity>
+    </rule>
+
+    <!-- Estas son las reglas que QUEREMOS excluir específicamente -->
+    <rule ref="Squiz.Commenting.FunctionComment.MissingParamType">
+        <severity>0</severity>
+    </rule>
+    <rule ref="Squiz.Commenting.FunctionComment.MissingReturnType">
+        <severity>0</severity>
+    </rule>
+    <rule ref="Squiz.Commenting.FunctionComment.IncorrectParamVarName">
+        <severity>0</severity>
+    </rule>
+    <rule ref="Squiz.Commenting.FunctionComment.ScalarTypeHintMissing">
+        <severity>0</severity>
+    </rule>
+    <rule ref="Squiz.Commenting.FunctionComment.TypeHintMissing">
         <severity>0</severity>
     </rule>
 
-    <!-- Activar solo reglas de documentación -->
-    <rule ref="Generic.Commenting.DocComment">
-        <!-- Mantener todas las reglas sobre formato básico de doc -->
+    <!-- Reglas para docblocks de clases -->
+    <rule ref="Squiz.Commenting.ClassComment.Missing">
+        <severity>5</severity>
     </rule>
-
-    <!-- Comentarios de funciones -->
-    <rule ref="Squiz.Commenting.FunctionComment">
-        <!-- Mantener las exclusiones existentes -->
-        <exclude name="Squiz.Commenting.FunctionComment.MissingParamType" />
-        <exclude name="Squiz.Commenting.FunctionComment.MissingReturnType" />
-        <exclude name="Squiz.Commenting.FunctionComment.IncorrectParamVarName" />
-        <exclude name="Squiz.Commenting.FunctionComment.ScalarTypeHintMissing" />
-        <exclude name="Squiz.Commenting.FunctionComment.TypeHintMissing" />
+    <rule ref="Squiz.Commenting.ClassComment.SpacingAfter">
+        <severity>5</severity>
     </rule>
-
-    <!-- Comentarios de variables -->
-    <rule ref="Squiz.Commenting.VariableComment">
-        <exclude name="Squiz.Commenting.VariableComment.MissingVar" />
-        <exclude name="Squiz.Commenting.VariableComment.Missing" />
-        <exclude name="Squiz.Commenting.VariableComment.MissingParamName" />
-        <exclude name="Squiz.Commenting.VariableComment.MissingParamComment" />
-        <exclude name="Squiz.Commenting.VariableComment.ParamNameNoMatch" />
-    </rule>
-
-    <!-- Comentarios de clases -->
-    <rule ref="Squiz.Commenting.ClassComment">
-        <exclude name="Squiz.Commenting.ClassComment.TagNotAllowed" />
-    </rule>
-
-    <!-- Desactivar explícitamente todas las reglas no relacionadas con documentación -->
-    <rule ref="Generic.WhiteSpace">
-        <severity>0</severity>
-    </rule>
-    <rule ref="Squiz.WhiteSpace">
-        <severity>0</severity>
-    </rule>
-    <rule ref="PSR2.Methods">
-        <severity>0</severity>
-    </rule>
-    <rule ref="PSR2.Classes">
-        <severity>0</severity>
-    </rule>
-    <rule ref="PSR2.ControlStructures">
-        <severity>0</severity>
-    </rule>
-    <rule ref="PSR2.Files">
-        <severity>0</severity>
-    </rule>
-    <rule ref="PSR12.Classes">
-        <severity>0</severity>
-    </rule>
-    <rule ref="PSR12.ControlStructures">
-        <severity>0</severity>
-    </rule>
-    <rule ref="PSR12.Files">
-        <severity>0</severity>
-    </rule>
-    <rule ref="PSR12.Functions">
-        <severity>0</severity>
-    </rule>
-    <rule ref="Squiz.Functions">
-        <severity>0</severity>
-    </rule>
-    <rule ref="Squiz.Classes">
-        <severity>0</severity>
-    </rule>
-    <rule ref="Squiz.ControlStructures">
-        <severity>0</severity>
-    </rule>
-    <rule ref="Squiz.Operators">
-        <severity>0</severity>
-    </rule>
-    <rule ref="Squiz.Scope">
-        <severity>0</severity>
-    </rule>
-    <rule ref="Generic.Functions">
-        <severity>0</severity>
-    </rule>
-    <rule ref="Generic.Classes">
-        <severity>0</severity>
-    </rule>
-    <rule ref="Generic.ControlStructures">
-        <severity>0</severity>
-    </rule>
-    <rule ref="Generic.Files">
-        <severity>0</severity>
-    </rule>
-    <rule ref="Generic.Formatting">
-        <severity>0</severity>
-    </rule>
-    <rule ref="Generic.NamingConventions">
-        <severity>0</severity>
-    </rule>
-    <rule ref="PEAR.Functions">
-        <severity>0</severity>
-    </rule>
-    <rule ref="PEAR.WhiteSpace">
+    <rule ref="Squiz.Commenting.ClassComment.TagNotAllowed">
         <severity>0</severity>
     </rule>
 
     <!-- Configuración general -->
     <arg name="basepath" value="." />
     <config name="php_version" value="80200" />
-    <arg name="tab-width" value="4" />
     <arg name="extensions" value="php" />
     <ini name="memory_limit" value="128M" />
 </ruleset>
