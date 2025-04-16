@@ -7,19 +7,21 @@
     <!-- Excluir vendor y otras carpetas innecesarias -->
     <exclude-pattern>*/vendor/*</exclude-pattern>
 
-    <!-- Incluir solo el conjunto mínimo de reglas que necesitamos -->
+    <!-- Activar reglas relacionadas con comentarios y PHPDoc -->
     <rule ref="Generic.Commenting.DocComment" />
+
     <rule ref="Squiz.Commenting.FunctionComment">
-        <!-- Exclusiones para tipos en documentación -->
         <exclude name="Squiz.Commenting.FunctionComment.MissingParamType" />
         <exclude name="Squiz.Commenting.FunctionComment.MissingReturnType" />
         <exclude name="Squiz.Commenting.FunctionComment.IncorrectParamVarName" />
         <exclude name="Squiz.Commenting.FunctionComment.ScalarTypeHintMissing" />
         <exclude name="Squiz.Commenting.FunctionComment.TypeHintMissing" />
     </rule>
+
     <rule ref="Squiz.Commenting.ClassComment">
         <exclude name="Squiz.Commenting.ClassComment.TagNotAllowed" />
     </rule>
+
     <rule ref="Squiz.Commenting.VariableComment">
         <exclude name="Squiz.Commenting.VariableComment.MissingVar" />
         <exclude name="Squiz.Commenting.VariableComment.Missing" />
@@ -28,62 +30,21 @@
         <exclude name="Squiz.Commenting.VariableComment.ParamNameNoMatch" />
     </rule>
 
-    <!-- Desactivar explícitamente las reglas de control de estructura -->
-    <rule ref="Squiz.ControlStructures">
-        <severity>0</severity>
-    </rule>
-    <rule ref="Generic.ControlStructures">
-        <severity>0</severity>
-    </rule>
-    <rule ref="PEAR.ControlStructures">
-        <severity>0</severity>
-    </rule>
-    <rule ref="PSR2.ControlStructures">
-        <severity>0</severity>
-    </rule>
-    <rule ref="PSR12.ControlStructures">
-        <severity>0</severity>
-    </rule>
+    <!-- Desactivar todas las reglas de formato y estructuras -->
+    <rule ref="Generic.ControlStructures" severity="0"/>
+    <rule ref="Squiz.ControlStructures" severity="0"/>
+    <rule ref="PEAR.ControlStructures" severity="0"/>
 
-    <!-- Desactivar explícitamente las reglas de espaciado -->
-    <rule ref="Squiz.WhiteSpace">
-        <severity>0</severity>
-    </rule>
-    <rule ref="Generic.WhiteSpace">
-        <severity>0</severity>
-    </rule>
-    <rule ref="PEAR.WhiteSpace">
-        <severity>0</severity>
-    </rule>
+    <rule ref="Squiz.WhiteSpace" severity="0"/>
+    <rule ref="Generic.WhiteSpace" severity="0"/>
+    <rule ref="PEAR.WhiteSpace" severity="0"/>
 
-    <!-- Desactivar reglas de formato de código -->
-    <rule ref="Generic.Formatting">
-        <severity>0</severity>
-    </rule>
-    <rule ref="PEAR.Formatting">
-        <severity>0</severity>
-    </rule>
-    <rule ref="Squiz.Formatting">
-        <severity>0</severity>
-    </rule>
-    <rule ref="PSR2.Methods">
-        <severity>0</severity>
-    </rule>
-    <rule ref="PSR12.Methods">
-        <severity>0</severity>
-    </rule>
-    <rule ref="PSR2.Classes">
-        <severity>0</severity>
-    </rule>
-    <rule ref="PSR12.Classes">
-        <severity>0</severity>
-    </rule>
-    <rule ref="Generic.Functions">
-        <severity>0</severity>
-    </rule>
-    <rule ref="PEAR.Functions">
-        <severity>0</severity>
-    </rule>
+    <rule ref="Generic.Formatting" severity="0"/>
+    <rule ref="PEAR.Formatting" severity="0"/>
+    <rule ref="Squiz.Formatting" severity="0"/>
+
+    <rule ref="Generic.Functions" severity="0"/>
+    <rule ref="PEAR.Functions" severity="0"/>
 
     <!-- Configuración general -->
     <arg name="basepath" value="." />
