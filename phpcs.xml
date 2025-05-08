@@ -1,20 +1,19 @@
 <?xml version="1.0"?>
 <ruleset name="DocStandard">
     <description>
-        PHP_CodeSniffer ruleset enfocado en validación de PHPDoc exclusivamente, sin reglas de formateo de código.
+        reglas de la documentacion ignorando errores del codigo.
     </description>
 
-    <!-- Excluir vendor y otras carpetas innecesarias -->
+    <!-- Excluir vendor -->
     <exclude-pattern>*/vendor/*</exclude-pattern>
 
-    <!-- Incluir solo las reglas relacionadas con PHPDoc -->
 
     <!-- Valida los bloques generales de PHPDoc -->
     <rule ref="Generic.Commenting.DocComment" />
 
     <!-- Valida la documentación de funciones -->
     <rule ref="Squiz.Commenting.FunctionComment">
-        <!-- No forzar tipos si no lo deseas -->
+        <!-- No forzar tipos si no se utilizan -->
         <exclude name="Squiz.Commenting.FunctionComment.MissingParamType" />
         <exclude name="Squiz.Commenting.FunctionComment.MissingReturnType" />
         <exclude name="Squiz.Commenting.FunctionComment.IncorrectParamVarName" />
