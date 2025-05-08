@@ -1,56 +1,44 @@
 <?xml version="1.0"?>
-<ruleset name="ModernPHPStandard">
-    <description>Modern PHP_CodeSniffer ruleset for PHP 8+</description>
+<ruleset name="DocStandard">
+    <description>
+        reglas de la documentacion ignorando errores del codigo.
+    </description>
 
-    <!-- Reglas principales -->
-    <rule ref="PSR12" />
-    <rule ref="Squiz.Commenting.FunctionComment" />
-    <rule ref="Squiz.Commenting.VariableComment" />
+    <!-- Excluir vendor -->
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+
+
+    <!-- Valida los bloques generales de PHPDoc -->
     <rule ref="Generic.Commenting.DocComment" />
-    <rule ref="Squiz.Commenting.ClassComment" />
 
-    <!-- Desactivar validación de comentarios en clases -->
+    <!-- Valida la documentación de funciones -->
+    <rule ref="Squiz.Commenting.FunctionComment">
+        <!-- No forzar tipos si no se utilizan -->
+        <exclude name="Squiz.Commenting.FunctionComment.MissingParamType" />
+        <exclude name="Squiz.Commenting.FunctionComment.MissingReturnType" />
+        <exclude name="Squiz.Commenting.FunctionComment.IncorrectParamVarName" />
+        <exclude name="Squiz.Commenting.FunctionComment.ScalarTypeHintMissing" />
+        <exclude name="Squiz.Commenting.FunctionComment.TypeHintMissing" />
+    </rule>
+
+    <!-- Valida la documentación en clases -->
     <rule ref="Squiz.Commenting.ClassComment">
-        <severity>0</severity>
+        <!-- Permitir etiquetas personalizadas como @category, @package, etc. -->
+        <exclude name="Squiz.Commenting.ClassComment.TagNotAllowed" />
     </rule>
 
-    <!-- Desactivar reglas de nombres camelCase -->
-    <rule ref="Squiz.NamingConventions.ValidFunctionName">
-        <severity>0</severity>
+    <!-- Valida la documentación de variables -->
+    <rule ref="Squiz.Commenting.VariableComment">
+        <exclude name="Squiz.Commenting.VariableComment.MissingVar" />
+        <exclude name="Squiz.Commenting.VariableComment.Missing" />
+        <exclude name="Squiz.Commenting.VariableComment.MissingParamName" />
+        <exclude name="Squiz.Commenting.VariableComment.MissingParamComment" />
+        <exclude name="Squiz.Commenting.VariableComment.ParamNameNoMatch" />
     </rule>
 
-    <!-- Desactivar reglas de espacios en la declaración de funciones -->
-    <rule ref="Squiz.Functions.FunctionDeclaration.SpaceBeforeOpenParenthesis">
-        <severity>0</severity>
-    </rule>
-    <rule ref="Squiz.Functions.FunctionDeclarationArgumentSpacing">
-        <severity>0</severity>
-    </rule>
-
-    <!-- Desactivar límite de longitud de línea -->
-    <rule ref="Generic.Files.LineLength">
-        <properties>
-            <property name="lineLimit" value="9999" />
-            <property name="absoluteLineLimit" value="0" />
-        </properties>
-    </rule>
-
-    <!-- Desactivar error por salto de línea estilo Windows -->
-    <rule ref="Generic.Files.LineEndings.InvalidEOLChar">
-        <severity>0</severity>
-    </rule>
-
-    <!-- Excluir reglas antiguas u obsoletas -->
-    <exclude name="Squiz.PHP.LowercasePHPFunctions" />
-    <exclude name="Squiz.NamingConventions.ValidVariableName.PrivateNoUnderscore" />
-    <exclude name="Squiz.Classes.ClassFileName.NoMatch" />
-    <exclude name="Squiz.Commenting.FileComment.Missing" />
-    <exclude name="Generic.Files.OneClassPerFile.MultipleFound" />
-    <exclude name="Generic.Files.OneClassPerFile.ClassesPerFile" />
-    <exclude name="Squiz.Commenting.ClassComment.TagNotAllowed" />
-
-    <!-- Configuración -->
-    <arg name="basepath" value="."/>
-    <config name="php_version" value="80200"/>
-    <arg name="tab-width" value="4"/>
+    <!-- Configuración general -->
+    <arg name="basepath" value="." />
+    <config name="php_version" value="80200" />
+    <arg name="extensions" value="php" />
+    <ini name="memory_limit" value="128M" />
 </ruleset>

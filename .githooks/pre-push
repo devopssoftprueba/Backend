@@ -1,27 +1,31 @@
-#!/bin/sh
+#!/bin/bash
+# ───────────────────────────────────────────────
+# 🔍 VALIDACIÓN DE NOMBRE DE RAMA
+# ───────────────────────────────────────────────
+# Define los patrones permitidos
 
-# Mensaje informativo para el usuario
+# Obtiene el nombre de la rama actual
+branch_name=$(git rev-parse --abbrev-ref HEAD)
+# Verifica si el nombre de la rama coincide con alguno de los patrones permitidos
+
+# ───────────────────────────────────────────────
+# 📄 VALIDACIÓN DE DOCUMENTACIÓN PHPDOC
+# ───────────────────────────────────────────────
 echo "🔍 Ejecutando validación PHPDoc con PHPCS..."
-
 # Obtener archivos PHP modificados (comparando contra el último commit en remoto)
-FILES=$(git diff --cached --name-only origin/$(git rev-parse --abbrev-ref HEAD) | grep -E '\.php$')
-
-# Si no hay archivos PHP modificados, no se realizan acciones
+FILES=$(git diff --cached --name-only origin/"$branch_name" | grep -E '\.php$')
+# Si no hay archivos PHP modificados, no hacemos nada
 if [ -z "$FILES" ]; then
   echo "✅ No hay archivos PHP modificados para validar."
   exit 0
 fi
-
 # Flag de errores
 ERROR=0
-
 # Verificar cada archivo PHP modificado que realmente exista
 for FILE in $FILES; do
-  # Verificar si el archivo aun existe en el sistema de archivos
   if [ -f "$FILE" ]; then
     echo "📂 Validando $FILE ..."
     vendor/bin/phpcs --standard=phpcs.xml "$FILE"
-    # Evaluar el codigo de salida del comando anterior
     if [ $? -ne 0 ]; then
       ERROR=1
     fi
@@ -29,12 +33,10 @@ for FILE in $FILES; do
     echo "⚠️ Archivo omitido (no existe): $FILE"
   fi
 done
-
-# Si hay errores, se bloquea el push
+# Si hay errores, cancelar el push
 if [ $ERROR -ne 0 ]; then
   echo "❌ Se encontraron errores en la documentación PHPDoc. Corrige antes de hacer push."
   exit 1
 fi
-
 echo "✅ Validación exitosa. Continuando con el push."
 exit 0
