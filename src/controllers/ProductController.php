@@ -33,7 +33,7 @@ class UserProfile
     private $userAge;
 
     /**
-     * Establece el nombre del usuario y agrego aqui para tomar un cambio.
+     * Establece el nombre del usuario.
      *
      * Este metodo asigna el valor proporcionado al nombre del usuario. El valor de `$userName` es una cadena de texto
      * que representa el nombre completo del usuario.
