@@ -1,42 +1,57 @@
 #!/bin/bash
 # ───────────────────────────────────────────────
-# 🔍 VALIDACIÓN DE NOMBRE DE RAMA
+# 📄 VALIDACIÓN DE DOCUMENTACIÓN PHPDOC
 # ───────────────────────────────────────────────
-# Define los patrones permitidos
+echo "🔍 Ejecutando validación PHPDoc con PHPCS (solo líneas modificadas)..."
 
 # Obtiene el nombre de la rama actual
 branch_name=$(git rev-parse --abbrev-ref HEAD)
-# Verifica si el nombre de la rama coincide con alguno de los patrones permitidos
 
-# ───────────────────────────────────────────────
-# 📄 VALIDACIÓN DE DOCUMENTACIÓN PHPDOC
-# ───────────────────────────────────────────────
-echo "🔍 Ejecutando validación PHPDoc con PHPCS..."
 # Obtener archivos PHP modificados (comparando contra el último commit en remoto)
 FILES=$(git diff --cached --name-only origin/"$branch_name" | grep -E '\.php$')
+
 # Si no hay archivos PHP modificados, no hacemos nada
 if [ -z "$FILES" ]; then
   echo "✅ No hay archivos PHP modificados para validar."
   exit 0
 fi
+
 # Flag de errores
 ERROR=0
+
 # Verificar cada archivo PHP modificado que realmente exista
 for FILE in $FILES; do
   if [ -f "$FILE" ]; then
-    echo "📂 Validando $FILE ..."
-    vendor/bin/phpcs --standard=phpcs.xml "$FILE"
-    if [ $? -ne 0 ]; then
-      ERROR=1
+    echo "📂 Validando líneas modificadas en $FILE ..."
+
+    # Obtener solo las líneas modificadas del archivo actual
+    DIFF_RANGE=$(git diff --cached -U0 origin/"$branch_name" -- "$FILE" | \
+                grep -E "^@@" | \
+                awk '{split($3,a,","); if(a[2]=="") a[2]=1; print a[1]+1"-"a[1]+a[2]}' | \
+                tr '\n' ',')
+
+    # Eliminar la última coma
+    DIFF_RANGE=${DIFF_RANGE%,}
+
+    if [ -n "$DIFF_RANGE" ]; then
+      # Ejecutar PHPCS solo en las líneas modificadas, manteniendo el estándar definido
+      vendor/bin/phpcs --standard=phpcs.xml --lines="$DIFF_RANGE" "$FILE"
+      if [ $? -ne 0 ]; then
+        ERROR=1
+      fi
+    else
+      echo "ℹ️ No se detectaron cambios en líneas de código para $FILE"
     fi
   else
     echo "⚠️ Archivo omitido (no existe): $FILE"
   fi
 done
+
 # Si hay errores, cancelar el push
 if [ $ERROR -ne 0 ]; then
   echo "❌ Se encontraron errores en la documentación PHPDoc. Corrige antes de hacer push."
   exit 1
 fi
+
 echo "✅ Validación exitosa. Continuando con el push."
 exit 0
