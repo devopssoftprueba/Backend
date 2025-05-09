@@ -15,7 +15,7 @@
 class UserProfile
 {
     /**
-     * Nombre del usuario.
+     * 
      *
      * Esta propiedad almacena el nombre del usuario. Se utiliza en el sistema para identificar al usuario.
      *
