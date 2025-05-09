@@ -2,7 +2,7 @@
 # ───────────────────────────────────────────────
 # 📄 VALIDACIÓN DE DOCUMENTACIÓN PHPDOC
 # ───────────────────────────────────────────────
-echo "🔍 Ejecutando validación PHPDoc con PHPCS (solo líneas modificadas)..."
+echo "🔍 Ejecutando validación PHPDoc con PHPCS..."
 
 # Obtiene el nombre de la rama actual
 branch_name=$(git rev-parse --abbrev-ref HEAD)
@@ -22,7 +22,7 @@ ERROR=0
 # Verificar cada archivo PHP modificado que realmente exista
 for FILE in $FILES; do
   if [ -f "$FILE" ]; then
-    echo "📂 Validando líneas modificadas en $FILE ..."
+    echo "📂 Validando $FILE ..."
 
     # Obtener solo las líneas modificadas del archivo actual
     DIFF_RANGE=$(git diff --cached -U0 origin/"$branch_name" -- "$FILE" | \
@@ -34,7 +34,7 @@ for FILE in $FILES; do
     DIFF_RANGE=${DIFF_RANGE%,}
 
     if [ -n "$DIFF_RANGE" ]; then
-      # Ejecutar PHPCS solo en las líneas modificadas, manteniendo el estándar definido
+      # Ejecutar PHPCS solo en las líneas modificadas
       vendor/bin/phpcs --standard=phpcs.xml --lines="$DIFF_RANGE" "$FILE"
       if [ $? -ne 0 ]; then
         ERROR=1
