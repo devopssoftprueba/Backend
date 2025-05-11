@@ -51,7 +51,7 @@ class UserProfile
      * Obtiene el nombre del usuario.
      *
      *
-     *sdfdfgdfgdgdfgdfgdfgfdg
+     *asdasdasdasd
      *
      */
     public function getUserName()
