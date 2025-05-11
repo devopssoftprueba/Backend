@@ -84,6 +84,7 @@ validate_function() {
     local end_line=$3
     local content=$4
     local temp_file="${TEMP_DIR}/temp.php"
+    local line_offset=$((start_line - 2))  # -2 por el <?php y la función
     
     # Crear archivo temporal con solo la función a validar
     echo "<?php" > "$temp_file"
@@ -94,8 +95,21 @@ validate_function() {
     cat "$temp_file"
     echo "───────────────────────────────────────────────"
     
-    # Ejecutar phpcs
-    if ! vendor/bin/phpcs --standard=phpcs.xml "$temp_file"; then
+    # Ejecutar phpcs y procesar su salida
+    if ! phpcs_output=$(vendor/bin/phpcs --standard=phpcs.xml "$temp_file" 2>&1); then
+        # Ajustar los números de línea en la salida
+        while IFS= read -r line; do
+            if [[ $line =~ ^[[:space:]]*([0-9]+)[[:space:]]*\| ]]; then
+                # Calcular la línea real en el archivo original
+                reported_line="${BASH_REMATCH[1]}"
+                actual_line=$((reported_line + line_offset))
+                # Reemplazar el número de línea en la salida
+                echo "$line" | sed "s/^[[:space:]]*$reported_line[[:space:]]*|/Línea $actual_line:|/"
+            else
+                echo "$line"
+            fi
+        done <<< "$phpcs_output"
+        
         echo "❌ Error de documentación en la función"
         echo "1" > "$ERROR_FILE"
         return 1
@@ -149,4 +163,4 @@ if [ "$ERROR" -ne 0 ]; then
 fi
 
 echo "✅ Validación exitosa. Continuando con el push."
-exit 0
+exit 0 	
