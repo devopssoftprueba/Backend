@@ -52,7 +52,7 @@ class UserProfile
      *
      *
      *
-     * @return string Nombre del usuario.
+     *
      */
     public function getUserName()
     {
