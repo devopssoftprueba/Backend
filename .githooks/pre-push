@@ -4,53 +4,101 @@
 # ───────────────────────────────────────────────
 echo "🔍 Ejecutando validación PHPDoc con PHPCS..."
 
-# Obtiene el nombre de la rama actual
-branch_name=$(git rev-parse --abbrev-ref HEAD)
-
-# Obtener archivos PHP modificados (comparando contra el último commit en remoto)
-FILES=$(git diff --cached --name-only origin/"$branch_name" | grep -E '\.php$')
+# Obtener archivos PHP modificados
+FILES=$(git diff --cached --name-only HEAD | grep -E '\.php$')
 
 # Si no hay archivos PHP modificados, no hacemos nada
 if [ -z "$FILES" ]; then
-  echo "✅ No hay archivos PHP modificados para validar."
-  exit 0
+    echo "✅ No hay archivos PHP modificados para validar."
+    exit 0
 fi
 
 # Flag de errores
 ERROR=0
 
-# Verificar cada archivo PHP modificado que realmente exista
+# Función para extraer el rango de líneas de una función/clase modificada
+get_modified_declarations() {
+    local file=$1
+    # Obtener las líneas modificadas
+    local modified_lines=$(git diff --cached -U0 "$file" | grep "^+" | grep -v "^+++" | cut -c2-)
+
+    # Obtener el contenido actual del archivo
+    local content=$(cat "$file")
+
+    # Crear un archivo temporal para las declaraciones modificadas
+    local temp_file=$(mktemp)
+
+    # Archivo temporal para guardar información de contexto
+    local context_file=$(mktemp)
+
+    # Por cada línea modificada, extraer la declaración completa
+    while IFS= read -r line; do
+        # Encontrar el número de línea donde aparece la modificación
+        line_number=$(echo "$content" | grep -n "$line" | cut -d: -f1)
+        if [ ! -z "$line_number" ]; then
+            # Buscar hacia arriba hasta encontrar la declaración
+            declaration_line=$(echo "$content" | head -n "$line_number" | tac | grep -n -m 1 "^[[:space:]]*(public\|private\|protected\|function\|class)" | cut -d: -f1)
+            start_line=$((line_number - declaration_line + 1))
+
+            # Buscar hacia abajo hasta encontrar el cierre
+            end_line=$((line_number + $(echo "$content" | tail -n+"$line_number" | grep -n -m 1 "^[[:space:]]*}" | cut -d: -f1)))
+
+            # Extraer la declaración
+            echo "# Archivo: $file (líneas $start_line-$end_line)" >> "$context_file"
+            sed -n "${start_line},${end_line}p" "$file" >> "$temp_file"
+            echo "" >> "$temp_file"
+        fi
+    done <<< "$modified_lines"
+
+    # Devolver ambos archivos temporales
+    echo "$temp_file:$context_file"
+}
+
+# Verificar cada archivo PHP modificado
 for FILE in $FILES; do
-  if [ -f "$FILE" ]; then
-    echo "📂 Validando $FILE ..."
+    if [ -f "$FILE" ]; then
+        echo "📂 Validando $FILE ..."
+        echo "───────────────────────────────────────────────"
 
-    # Obtener solo las líneas modificadas del archivo actual
-    DIFF_RANGE=$(git diff --cached -U0 origin/"$branch_name" -- "$FILE" | \
-                grep -E "^@@" | \
-                awk '{split($3,a,","); if(a[2]=="") a[2]=1; print a[1]+1"-"a[1]+a[2]}' | \
-                tr '\n' ',')
+        # Obtener las declaraciones modificadas y su contexto
+        TEMP_FILES=$(get_modified_declarations "$FILE")
+        TEMP_FILE=$(echo "$TEMP_FILES" | cut -d: -f1)
+        CONTEXT_FILE=$(echo "$TEMP_FILES" | cut -d: -f2)
 
-    # Eliminar la última coma
-    DIFF_RANGE=${DIFF_RANGE%,}
+        if [ -s "$TEMP_FILE" ]; then
+            # Mostrar qué declaraciones específicas están siendo validadas
+            echo "🔍 Validando las siguientes declaraciones modificadas:"
+            cat "$CONTEXT_FILE"
+            echo "───────────────────────────────────────────────"
 
-    if [ -n "$DIFF_RANGE" ]; then
-      # Ejecutar PHPCS solo en las líneas modificadas
-      vendor/bin/phpcs --standard=phpcs.xml --lines="$DIFF_RANGE" "$FILE"
-      if [ $? -ne 0 ]; then
-        ERROR=1
-      fi
+            # Validar solo las declaraciones modificadas
+            PHPCS_OUTPUT=$(vendor/bin/phpcs --standard=phpcs.xml "$TEMP_FILE" 2>&1)
+            PHPCS_STATUS=$?
+
+            # Mostrar el resultado de la validación
+            if [ $PHPCS_STATUS -ne 0 ]; then
+                echo "❌ Se encontraron problemas en la documentación:"
+                echo "$PHPCS_OUTPUT"
+                ERROR=1
+            else
+                echo "✅ La documentación cumple con los estándares."
+            fi
+        else
+            echo "ℹ️ No se encontraron declaraciones modificadas que requieran validación."
+        fi
+
+        # Limpiar archivos temporales
+        rm -f "$TEMP_FILE" "$CONTEXT_FILE"
+        echo "───────────────────────────────────────────────"
     else
-      echo "ℹ️ No se detectaron cambios en líneas de código para $FILE"
+        echo "⚠️ Archivo omitido (no existe): $FILE"
     fi
-  else
-    echo "⚠️ Archivo omitido (no existe): $FILE"
-  fi
 done
 
 # Si hay errores, cancelar el push
 if [ $ERROR -ne 0 ]; then
-  echo "❌ Se encontraron errores en la documentación PHPDoc. Corrige antes de hacer push."
-  exit 1
+    echo "❌ Se encontraron errores en la documentación PHPDoc. Corrige antes de hacer push."
+    exit 1
 fi
 
 echo "✅ Validación exitosa. Continuando con el push."
