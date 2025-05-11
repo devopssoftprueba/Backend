@@ -50,7 +50,7 @@ class UserProfile
     /**
      * Obtiene el nombre del usuario.
      *
-     * Este metodo devuelve el nombre almacenado del usuario.
+     *
      *
      * @return string Nombre del usuario.
      */
