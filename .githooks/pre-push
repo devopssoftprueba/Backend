@@ -1,18 +1,27 @@
 #!/bin/bash
-set -e
-
 # ───────────────────────────────────────────────
 # 📄 VALIDACIÓN DE DOCUMENTACIÓN PHPDOC
 # ───────────────────────────────────────────────
-echo "🔍 Iniciando validación PHPDoc con PHPCS..."
-echo "📅 Fecha: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
-echo "👤 Usuario: $(git config user.name)"
+
+# Habilitar modo debug para ver exactamente qué está pasando
+set -x
+
+# Función para logging
+log_message() {
+    echo "[$(date -u +"%Y-%m-%d %H:%M:%S UTC")] $1"
+}
 
 # Función para salir con error
 exit_with_error() {
-    echo "❌ $1"
+    log_message "❌ $1"
     exit 1
 }
+
+# Capturar errores y mostrar mensaje
+trap 'exit_with_error "El script falló en la línea $LINENO"' ERR
+
+log_message "🔍 Iniciando validación PHPDoc con PHPCS..."
+log_message "👤 Usuario: $(git config user.name)"
 
 # Obtener commits para comparación
 local_commit=$(git rev-parse HEAD) || exit_with_error "No se pudo obtener el commit local"
@@ -28,7 +37,9 @@ get_function_bounds() {
     local target_line=$2
     local content="$3"
     
-    # Buscar hacia arriba hasta encontrar el inicio del docblock o la función
+    log_message "Buscando límites de función cerca de la línea $target_line"
+    
+    # Buscar hacia arriba hasta encontrar el inicio de la función
     local start=$target_line
     while [ $start -gt 1 ]; do
         local line=$(echo "$content" | sed "${start}q;d")
@@ -40,23 +51,22 @@ get_function_bounds() {
     
     # Buscar hacia abajo hasta encontrar el final de la función
     local end=$target_line
-    local found_bracket=false
     local bracket_count=0
     
     while IFS= read -r line; do
         if [[ $line =~ \{ ]]; then
-            found_bracket=true
             ((bracket_count++))
         fi
         if [[ $line =~ \} ]]; then
             ((bracket_count--))
-        fi
-        if [ "$found_bracket" = true ] && [ $bracket_count -eq 0 ]; then
-            break
+            if [ $bracket_count -eq 0 ]; then
+                break
+            fi
         fi
         ((end++))
     done < <(echo "$content" | tail -n +$target_line)
     
+    log_message "Función encontrada entre las líneas $start y $end"
     echo "$start $end"
 }
 
@@ -66,35 +76,31 @@ validate_function() {
     local start_line=$2
     local end_line=$3
     local temp_file="$TEMP_DIR/temp_func.php"
-    local original_line_offset=$((start_line - 2))  # -2 por el <?php y el espacio
     
-    # Crear archivo PHP válido para testing
+    log_message "Validando función en $file (líneas $start_line-$end_line)"
+    
+    # Crear archivo temporal con la función
     echo "<?php" > "$temp_file"
-    echo "" >> "$temp_file"  # Línea en blanco para mantener números de línea consistentes
     git show "$local_commit:$file" | sed -n "${start_line},${end_line}p" >> "$temp_file"
     
-    echo "Validando función en $file (líneas $start_line-$end_line):"
+    echo "Contenido a validar:"
     echo "───────────────────────────────────────────────"
-    echo "Contenido del archivo original:"
-    git show "$local_commit:$file" | sed -n "${start_line},${end_line}p" | nl -ba
+    cat "$temp_file"
     echo "───────────────────────────────────────────────"
     
-    # Ejecutar phpcs y procesar su salida
-    if ! phpcs_output=$(vendor/bin/phpcs --standard=phpcs.xml "$temp_file" 2>&1); then
-        # Procesar la salida para mostrar números de línea correctos
-        while IFS= read -r line; do
-            if [[ $line =~ ^[[:space:]]*([0-9]+)[[:space:]]*\|[[:space:]]*(ERROR|WARNING) ]]; then
-                # Ajustar el número de línea al archivo original
-                reported_line="${BASH_REMATCH[1]}"
-                error_type="${BASH_REMATCH[2]}"
-                actual_line=$((reported_line + original_line_offset))
-                echo "Línea $actual_line: $error_type - Falta o hay un problema con la documentación de la función"
-            else
-                echo "$line"
-            fi
-        done <<< "$phpcs_output"
-        
-        echo "❌ Error encontrado en la función que comienza en la línea $start_line"
+    # Ejecutar phpcs con salida detallada
+    phpcs_output=$(vendor/bin/phpcs --standard=phpcs.xml "$temp_file" 2>&1)
+    phpcs_status=$?
+    
+    # Siempre mostrar la salida de phpcs
+    echo "$phpcs_output"
+    
+    if [ $phpcs_status -ne 0 ]; then
+        log_message "❌ Error en la documentación de la función"
+        echo "La función necesita:"
+        echo "  - Documentación PHPDoc completa"
+        echo "  - @return con el tipo de retorno"
+        echo "  - Descripción clara de la función"
         return 1
     fi
     
@@ -104,41 +110,38 @@ validate_function() {
 # Procesar cada archivo PHP modificado
 has_errors=0
 
-while IFS= read -r file; do
-    [[ $file != *.php ]] && continue
+git diff --name-only "$remote_commit" "$local_commit" | while read -r file; do
+    if [[ ! $file =~ \.php$ ]]; then
+        continue
+    fi
     
-    echo "📂 Analizando $file..."
+    log_message "📂 Analizando $file"
     
     # Obtener el contenido actual del archivo
     content=$(git show "$local_commit:$file")
     
     # Procesar cada hunk modificado
-    while IFS= read -r hunk; do
-        [[ $hunk =~ ^@@ ]] || continue
-        
+    git diff -U0 "$remote_commit" "$local_commit" -- "$file" | grep -E '^@@' | while read -r hunk; do
         if [[ $hunk =~ \+([0-9]+)(,[0-9]+)? ]]; then
             modified_line="${BASH_REMATCH[1]}"
+            
+            log_message "Encontrada modificación en línea $modified_line"
             
             # Obtener los límites de la función
             read start_line end_line < <(get_function_bounds "$file" "$modified_line" "$content")
             
             if ! validate_function "$file" "$start_line" "$end_line"; then
                 has_errors=1
-                echo "❌ La función en la línea $start_line necesita documentación PHPDoc válida"
-                echo "   Debe incluir:"
-                echo "   - Descripción de la función"
-                echo "   - @return con el tipo de retorno"
-                echo "   - No debe tener líneas vacías innecesarias"
+                log_message "❌ Error en la función que comienza en la línea $start_line"
             fi
         fi
-    done < <(git diff -U0 "$remote_commit" "$local_commit" -- "$file" | grep -E '^@@')
-    
-done < <(git diff --name-only "$remote_commit" "$local_commit")
+    done
+done
 
 # Verificación final
 if [ $has_errors -eq 1 ]; then
-    exit_with_error "Se encontraron errores en la documentación PHPDoc. Por favor, corrige los problemas antes de hacer push."
+    exit_with_error "Se encontraron errores en la documentación PHPDoc. Corrige los problemas antes de hacer push."
 fi
 
-echo "✅ Validación exitosa. Continuando con el push."
+log_message "✅ Validación exitosa. Continuando con el push."
 exit 0
