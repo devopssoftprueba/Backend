@@ -22,13 +22,18 @@ find_function_range() {
     local file=$1
     local target_line=$2
     local content=$3
-    local temp_range_file="${TEMP_DIR}/range.txt"
     
-    # Buscar hacia arriba hasta encontrar el inicio del docblock o la función
+    # Buscar hacia arriba hasta encontrar el inicio de la función actual
     local start_line=$target_line
     while [ $start_line -gt 1 ]; do
         local line=$(echo "$content" | sed "${start_line}q;d")
-        if [[ $line =~ ^\s*(/\*\*) ]] || [[ $line =~ ^[[:space:]]*(public|private|protected|function)[[:space:]]+.*\( ]]; then
+        # Si encontramos el inicio de otra función, retrocedemos
+        if [ $start_line -lt $target_line ] && [[ $line =~ ^[[:space:]]*(public|private|protected|function)[[:space:]]+.*\( ]]; then
+            start_line=$((start_line + 1))
+            break
+        fi
+        # Si encontramos el inicio de la función actual o su docblock
+        if [[ $line =~ ^[[:space:]]*(public|private|protected|function)[[:space:]]+.*\( ]] || [[ $line =~ ^\s*(/\*\*) ]]; then
             break
         fi
         start_line=$((start_line - 1))
@@ -46,7 +51,7 @@ find_function_range() {
         done
     fi
     
-    # Buscar hacia abajo hasta encontrar el final de la función
+    # Buscar hacia abajo hasta encontrar el final de esta función específica
     local end_line=$target_line
     local brace_count=0
     local found_function=false
@@ -60,9 +65,14 @@ find_function_range() {
         fi
         if [[ $line =~ \} ]]; then
             brace_count=$((brace_count - 1))
+            if [ $found_function = true ] && [ $brace_count -eq 0 ]; then
+                break
+            fi
         fi
         
-        if [ $found_function = true ] && [ $brace_count -eq 0 ]; then
+        # Si encontramos el inicio de la siguiente función, retrocedemos
+        if [ $end_line -gt $target_line ] && [[ $line =~ ^[[:space:]]*(public|private|protected|function)[[:space:]]+.*\( ]]; then
+            end_line=$((end_line - 1))
             break
         fi
         
@@ -76,7 +86,6 @@ find_function_range() {
     
     echo "$start_line $end_line"
 }
-
 # Función para validar una función específica
 validate_function() {
     local file=$1

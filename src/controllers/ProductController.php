@@ -50,8 +50,6 @@ class UserProfile
     /**
      * Obtiene el nombre del usuario.
      *
-     *
-     *
      * @return string $username variable donde está el nombre.
      */
     public function getUserName()
