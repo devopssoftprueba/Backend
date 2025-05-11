@@ -21,7 +21,7 @@ class UserProfile
      *
      * @var string $userName Variable con el nombre del usuario.
      */
-    private $userName;
+    private $userName1;
 
     /**
      * Edad del usuario.
