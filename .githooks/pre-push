@@ -4,7 +4,7 @@
 # ───────────────────────────────────────────────
 echo "🔍 Iniciando validación PHPDoc con PHPCS..."
 echo "📅 Fecha: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
-echo "👤 Usuario: $USER"
+echo "👤 Usuario: $(git config user.name)"
 
 # Obtener el hash del último commit local y remoto
 local_commit=$(git rev-parse HEAD)
@@ -19,88 +19,72 @@ if [ -z "$FILES" ]; then
     exit 0
 fi
 
-# Flag de errores
 ERROR=0
 
-# Función para validar un bloque de código
-validate_code_block() {
-    local temp_file=$1
-    local line_number=$2
-    local file_name=$3
-
-    # Ejecutar phpcs y capturar tanto la salida como el código de retorno
-    PHPCS_OUTPUT=$(vendor/bin/phpcs --standard=phpcs.xml "$temp_file" 2>&1)
-    PHPCS_STATUS=$?
-
-    echo "Validando bloque en $file_name:$line_number"
-    echo "$PHPCS_OUTPUT"
-
-    if [ $PHPCS_STATUS -ne 0 ]; then
-        echo "❌ Error de validación en $file_name:$line_number"
-        echo "$PHPCS_OUTPUT"
-        return 1
-    fi
-    return 0
-}
-
-# Verificar cada archivo PHP modificado
 for FILE in $FILES; do
     if git show $local_commit:"$FILE" > /dev/null 2>&1; then
         echo "📂 Validando $FILE ..."
         echo "───────────────────────────────────────────────"
         
-        # Crear archivo temporal para el código modificado
+        # Crear archivo temporal
         TEMP_FILE=$(mktemp)
-        echo "<?php" > "$TEMP_FILE"
-
+        
         # Obtener el contenido actual del archivo
         CONTENT=$(git show $local_commit:"$FILE")
-
-        # Obtener los hunks modificados
-        git diff -U0 $remote_commit $local_commit -- "$FILE" | while read -r line; do
+        
+        # Obtener las líneas modificadas usando git diff
+        DIFF_OUTPUT=$(git diff -U0 $remote_commit $local_commit -- "$FILE")
+        
+        # Procesar cada hunk del diff
+        while IFS= read -r line; do
             if [[ $line =~ ^@@ ]]; then
-                # Extraer números de línea del hunk
                 if [[ $line =~ \+([0-9]+) ]]; then
                     start_line="${BASH_REMATCH[1]}"
                     
-                    # Buscar inicio de la función/método
+                    # Buscar el inicio de la función/método y su docblock
                     func_start=$start_line
                     while [ $func_start -gt 1 ]; do
                         prev_line=$(echo "$CONTENT" | sed "${func_start}q;d")
-                        if [[ $prev_line =~ ^\s*(/\*\*|class|function) ]]; then
+                        if [[ $prev_line =~ ^\s*(/\*\*) ]]; then
                             break
                         fi
                         func_start=$((func_start - 1))
                     done
-
-                    # Buscar final de la función/método
+                    
+                    # Buscar el final de la función
                     func_end=$start_line
-                    while true; do
+                    total_lines=$(echo "$CONTENT" | wc -l)
+                    while [ $func_end -le $total_lines ]; do
                         next_line=$(echo "$CONTENT" | sed "${func_end}q;d")
-                        if [[ $next_line =~ ^\s*} ]] || [ -z "$next_line" ]; then
+                        if [[ $next_line =~ ^\s*} ]]; then
+                            func_end=$((func_end + 1))
                             break
                         fi
                         func_end=$((func_end + 1))
                     done
-
+                    
                     # Extraer el bloque completo
-                    echo "$CONTENT" | sed -n "${func_start},${func_end}p" > "$TEMP_FILE"
-
-                    # Validar el bloque
-                    if ! validate_code_block "$TEMP_FILE" "$start_line" "$FILE"; then
+                    echo "<?php" > "$TEMP_FILE"
+                    echo "$CONTENT" | sed -n "${func_start},${func_end}p" >> "$TEMP_FILE"
+                    
+                    echo "Validando bloque en $FILE (líneas $func_start-$func_end):"
+                    echo "───────────────────────────────────────────────"
+                    cat "$TEMP_FILE"
+                    echo "───────────────────────────────────────────────"
+                    
+                    # Ejecutar phpcs
+                    if vendor/bin/phpcs --standard=phpcs.xml "$TEMP_FILE" 2>/dev/null; then
+                        echo "✅ Bloque validado correctamente"
+                    else
+                        echo "❌ Error en la documentación del bloque"
                         ERROR=1
-                        echo "❌ Error encontrado en $FILE cerca de la línea $start_line"
-                        echo "───────────────────────────────────────────────"
-                        cat "$TEMP_FILE"
-                        echo "───────────────────────────────────────────────"
+                        break 2  # Salir de ambos bucles si hay error
                     fi
                 fi
             fi
-        done
-
+        done <<< "$DIFF_OUTPUT"
+        
         rm -f "$TEMP_FILE"
-    else
-        echo "⚠️ Archivo omitido (no existe): $FILE"
     fi
 done
 
