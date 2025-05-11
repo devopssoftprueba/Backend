@@ -4,16 +4,11 @@
 # ───────────────────────────────────────────────
 echo "🔍 Ejecutando validación PHPDoc con PHPCS..."
 
-# Habilitar modo debug para ver más información
-set -x
-
 # Obtener el hash del último commit local y remoto
 local_commit=$(git rev-parse HEAD)
 remote_commit=$(git rev-parse @{u} 2>/dev/null || git hash-object -t tree /dev/null)
 
-echo "Comparando commits: $remote_commit..$local_commit"
-
-# Obtener archivos PHP modificados entre el commit remoto y local
+# Obtener archivos PHP modificados
 FILES=$(git diff --name-only $remote_commit $local_commit | grep -E '\.php$')
 
 # Si no hay archivos PHP modificados, no hacemos nada
@@ -25,78 +20,46 @@ fi
 # Flag de errores
 ERROR=0
 
-# Función para extraer el rango de líneas de una función/clase modificada
-get_modified_declarations() {
+# Función para extraer una función/método modificado
+extract_modified_function() {
     local file=$1
-    local remote_commit=$2
-    local local_commit=$3
-
-    echo "Analizando cambios en $file entre $remote_commit y $local_commit"
-
-    # Obtener las líneas modificadas con más contexto
-    local diff_output=$(git diff -U3 $remote_commit $local_commit -- "$file")
-    echo "Diff completo:"
-    echo "$diff_output"
-
-    # Crear archivos temporales
-    local temp_file=$(mktemp)
-    local context_file=$(mktemp)
-
-    # Obtener el contenido actual del archivo
-    local content=$(git show $local_commit:"$file")
-
-    # Encontrar las funciones/clases modificadas usando el diff
-    while IFS= read -r line; do
-        if [[ $line =~ ^@@ ]]; then
-            # Extraer números de línea del encabezado del diff
-            local start_line=$(echo "$line" | grep -o -E '\+[0-9]+' | head -1 | tr -d '+')
-            if [ ! -z "$start_line" ]; then
-                # Buscar la declaración que contiene esta línea
-                local declaration_start=$(echo "$content" | head -n $start_line | tac | grep -n -m 1 '^[[:space:]]*(public\|private\|protected\|function\|class)' | cut -d: -f1)
-                if [ ! -z "$declaration_start" ]; then
-                    declaration_start=$((start_line - declaration_start + 1))
-
-                    # Buscar el final de la declaración
-                    local declaration_end=$((start_line + $(echo "$content" | tail -n+$start_line | grep -n -m 1 '^[[:space:]]*}' | cut -d: -f1)))
-
-                    echo "Encontrada declaración en líneas $declaration_start-$declaration_end"
-
-                    # Extraer la declaración completa
-                    echo "# Archivo: $file (líneas $declaration_start-$declaration_end)" >> "$context_file"
-                    echo "$content" | sed -n "${declaration_start},${declaration_end}p" >> "$temp_file"
-                    echo "" >> "$temp_file"
-                fi
-            fi
+    local start_line=$2
+    local content=$3
+    
+    # Buscar hacia arriba hasta encontrar el inicio de la función/clase
+    local declaration_start=$start_line
+    while [ $declaration_start -gt 1 ]; do
+        local line=$(echo "$content" | sed "${declaration_start}q;d")
+        if [[ $line =~ ^[[:space:]]*(public|private|protected|function|class)[[:space:]]+ ]]; then
+            break
         fi
-    done <<< "$diff_output"
-
-    # Si no se encontraron declaraciones, intentar con otro método
-    if [ ! -s "$temp_file" ]; then
-        echo "No se encontraron declaraciones con el primer método, intentando método alternativo..."
-        local modified_lines=$(echo "$diff_output" | grep "^+" | grep -v "^+++" | cut -c2-)
-        while IFS= read -r line; do
-            local line_number=$(echo "$content" | grep -n "$line" | cut -d: -f1)
-            if [ ! -z "$line_number" ]; then
-                local start_line=$((line_number - 10)) # Buscar 10 líneas arriba
-                [ $start_line -lt 1 ] && start_line=1
-                local context_before=$(echo "$content" | sed -n "${start_line},${line_number}p")
-                local declaration_line=$(echo "$context_before" | tac | grep -n -m 1 '^[[:space:]]*(public\|private\|protected\|function\|class)' | cut -d: -f1)
-                if [ ! -z "$declaration_line" ]; then
-                    declaration_start=$((line_number - declaration_line + 1))
-                    declaration_end=$((line_number + $(echo "$content" | tail -n+$line_number | grep -n -m 1 '^[[:space:]]*}' | cut -d: -f1)))
-                    echo "# Archivo: $file (líneas $declaration_start-$declaration_end)" >> "$context_file"
-                    echo "$content" | sed -n "${declaration_start},${declaration_end}p" >> "$temp_file"
-                    echo "" >> "$temp_file"
-                fi
-            fi
-        done <<< "$modified_lines"
-    fi
-
-    echo "Contenido del archivo temporal:"
-    cat "$temp_file"
-
-    # Devolver ambos archivos temporales
-    echo "$temp_file:$context_file"
+        declaration_start=$((declaration_start - 1))
+    done
+    
+    # Buscar hacia abajo hasta encontrar el final de la función (})
+    local declaration_end=$start_line
+    local content_lines=$(echo "$content" | wc -l)
+    while [ $declaration_end -lt $content_lines ]; do
+        local line=$(echo "$content" | sed "${declaration_end}q;d")
+        if [[ $line =~ ^[[:space:]]*} ]]; then
+            break
+        fi
+        declaration_end=$((declaration_end + 1))
+    done
+    
+    # Extraer la función completa incluyendo su documentación
+    local doc_start=$declaration_start
+    while [ $doc_start -gt 1 ]; do
+        local line=$(echo "$content" | sed "${doc_start}q;d")
+        if [[ $line =~ ^[[:space:]]*(/\*\*|\*|/\*) ]]; then
+            doc_start=$((doc_start - 1))
+        else
+            doc_start=$((doc_start + 1))
+            break
+        fi
+    done
+    
+    echo "$content" | sed -n "${doc_start},${declaration_end}p"
 }
 
 # Verificar cada archivo PHP modificado
@@ -104,43 +67,46 @@ for FILE in $FILES; do
     if git show $local_commit:"$FILE" > /dev/null 2>&1; then
         echo "📂 Validando $FILE ..."
         echo "───────────────────────────────────────────────"
-
-        # Obtener las declaraciones modificadas y su contexto
-        TEMP_FILES=$(get_modified_declarations "$FILE" "$remote_commit" "$local_commit")
-        TEMP_FILE=$(echo "$TEMP_FILES" | cut -d: -f1)
-        CONTEXT_FILE=$(echo "$TEMP_FILES" | cut -d: -f2)
-
-        if [ -s "$TEMP_FILE" ]; then
-            echo "🔍 Validando las siguientes declaraciones modificadas:"
-            cat "$CONTEXT_FILE"
-            echo "───────────────────────────────────────────────"
-
-            # Validar solo las declaraciones modificadas
-            PHPCS_OUTPUT=$(vendor/bin/phpcs --standard=phpcs.xml "$TEMP_FILE" 2>&1)
-            PHPCS_STATUS=$?
-
-            # Mostrar el resultado de la validación
-            if [ $PHPCS_STATUS -ne 0 ]; then
-                echo "❌ Se encontraron problemas en la documentación:"
-                echo "$PHPCS_OUTPUT"
-                ERROR=1
-            else
-                echo "✅ La documentación cumple con los estándares."
+        
+        # Obtener las líneas modificadas
+        TEMP_FILE=$(mktemp)
+        CONTENT=$(git show $local_commit:"$FILE")
+        
+        # Obtener las líneas modificadas con número de línea
+        git diff -U0 $remote_commit $local_commit -- "$FILE" | grep -E "^@@" | while read -r line; do
+            # Extraer el número de línea del cambio
+            if [[ $line =~ \+([0-9]+) ]]; then
+                line_number="${BASH_REMATCH[1]}"
+                
+                # Extraer la función/método modificado
+                modified_function=$(extract_modified_function "$FILE" "$line_number" "$CONTENT")
+                
+                if [ ! -z "$modified_function" ]; then
+                    echo "🔍 Validando función/método modificado en línea $line_number"
+                    echo "$modified_function" > "$TEMP_FILE"
+                    
+                    # Validar solo esta función
+                    PHPCS_OUTPUT=$(vendor/bin/phpcs --standard=phpcs.xml "$TEMP_FILE" 2>&1)
+                    PHPCS_STATUS=$?
+                    
+                    if [ $PHPCS_STATUS -ne 0 ]; then
+                        echo "❌ Se encontraron problemas en la documentación:"
+                        echo "$PHPCS_OUTPUT"
+                        ERROR=1
+                    else
+                        echo "✅ La documentación cumple con los estándares."
+                    fi
+                    echo "───────────────────────────────────────────────"
+                fi
             fi
-        else
-            echo "ℹ️ No se encontraron declaraciones modificadas que requieran validación."
-        fi
-
-        # Limpiar archivos temporales
-        rm -f "$TEMP_FILE" "$CONTEXT_FILE"
-        echo "───────────────────────────────────────────────"
+        done
+        
+        # Limpiar archivo temporal
+        rm -f "$TEMP_FILE"
     else
         echo "⚠️ Archivo omitido (no existe): $FILE"
     fi
 done
-
-# Deshabilitar modo debug
-set +x
 
 # Si hay errores, cancelar el push
 if [ $ERROR -ne 0 ]; then
