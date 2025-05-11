@@ -57,7 +57,7 @@ class UserProfile
     public function getUserName()
     {
         return $this->userName;
-        $data;
+        $prueba;
     }
 
     /**
