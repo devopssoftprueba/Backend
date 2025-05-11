@@ -15,7 +15,7 @@
 class UserProfile
 {
     /**
-     * 
+     * variable $username.
      *
      * Esta propiedad almacena el nombre del usuario. Se utiliza en el sistema para identificar al usuario.
      *
