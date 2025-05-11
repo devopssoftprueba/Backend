@@ -10,86 +10,96 @@ echo "👤 Usuario: $(git config user.name)"
 local_commit=$(git rev-parse HEAD)
 remote_commit=$(git rev-parse @{u} 2>/dev/null || git hash-object -t tree /dev/null)
 
-# Obtener archivos PHP modificados
-FILES=$(git diff --name-only $remote_commit $local_commit | grep -E '\.php$')
-
-# Si no hay archivos PHP modificados, no hacemos nada
-if [ -z "$FILES" ]; then
-    echo "✅ No hay archivos PHP modificados para validar."
-    exit 0
-fi
-
+# Crear directorio temporal
+TEMP_DIR=$(mktemp -d)
 ERROR=0
 
-for FILE in $FILES; do
-    if git show $local_commit:"$FILE" > /dev/null 2>&1; then
-        echo "📂 Validando $FILE ..."
-        echo "───────────────────────────────────────────────"
-        
-        # Crear archivo temporal
-        TEMP_FILE=$(mktemp)
+# Función para extraer y validar una función modificada
+validate_modified_function() {
+    local file=$1
+    local start_line=$2
+    local content=$3
+    local temp_file="${TEMP_DIR}/temp.php"
+
+    # Buscar el inicio del bloque de documentación
+    local doc_start=$start_line
+    while [ $doc_start -gt 1 ]; do
+        local line=$(echo "$content" | sed "${doc_start}q;d")
+        if [[ $line =~ ^\s*(/\*\*) ]]; then
+            break
+        elif [[ $line =~ ^[[:space:]]*(public|private|protected|function|class)[[:space:]]+ ]]; then
+            doc_start=$((doc_start - 1))
+            continue
+        fi
+        doc_start=$((doc_start - 1))
+    done
+
+    # Buscar el final de la función
+    local func_end=$start_line
+    while true; do
+        local line=$(echo "$content" | sed "${func_end}q;d")
+        if [[ $line =~ ^\s*} ]]; then
+            func_end=$((func_end + 1))
+            break
+        elif [ -z "$line" ]; then
+            break
+        fi
+        func_end=$((func_end + 1))
+    done
+
+    # Extraer solo la función modificada
+    echo "<?php" > "$temp_file"
+    echo "$content" | sed -n "${doc_start},${func_end}p" >> "$temp_file"
+
+    echo "Validando función en $file (líneas $doc_start-$func_end):"
+    echo "───────────────────────────────────────────────"
+    cat "$temp_file"
+    echo "───────────────────────────────────────────────"
+
+    # Ejecutar phpcs con salida detallada
+    if ! vendor/bin/phpcs --standard=phpcs.xml "$temp_file"; then
+        echo "❌ Error de documentación en la función"
+        return 1
+    fi
+    return 0
+}
+
+# Procesar cada archivo PHP modificado
+git diff --name-only $remote_commit $local_commit | grep -E '\.php$' | while read -r file; do
+    if [ -f "$file" ]; then
+        echo "📂 Analizando $file..."
         
         # Obtener el contenido actual del archivo
-        CONTENT=$(git show $local_commit:"$FILE")
+        content=$(git show $local_commit:"$file")
         
-        # Obtener las líneas modificadas usando git diff
-        DIFF_OUTPUT=$(git diff -U0 $remote_commit $local_commit -- "$FILE")
-        
-        # Procesar cada hunk del diff
-        while IFS= read -r line; do
-            if [[ $line =~ ^@@ ]]; then
-                if [[ $line =~ \+([0-9]+) ]]; then
-                    start_line="${BASH_REMATCH[1]}"
-                    
-                    # Buscar el inicio de la función/método y su docblock
-                    func_start=$start_line
-                    while [ $func_start -gt 1 ]; do
-                        prev_line=$(echo "$CONTENT" | sed "${func_start}q;d")
-                        if [[ $prev_line =~ ^\s*(/\*\*) ]]; then
-                            break
-                        fi
-                        func_start=$((func_start - 1))
-                    done
-                    
-                    # Buscar el final de la función
-                    func_end=$start_line
-                    total_lines=$(echo "$CONTENT" | wc -l)
-                    while [ $func_end -le $total_lines ]; do
-                        next_line=$(echo "$CONTENT" | sed "${func_end}q;d")
-                        if [[ $next_line =~ ^\s*} ]]; then
-                            func_end=$((func_end + 1))
-                            break
-                        fi
-                        func_end=$((func_end + 1))
-                    done
-                    
-                    # Extraer el bloque completo
-                    echo "<?php" > "$TEMP_FILE"
-                    echo "$CONTENT" | sed -n "${func_start},${func_end}p" >> "$TEMP_FILE"
-                    
-                    echo "Validando bloque en $FILE (líneas $func_start-$func_end):"
-                    echo "───────────────────────────────────────────────"
-                    cat "$TEMP_FILE"
-                    echo "───────────────────────────────────────────────"
-                    
-                    # Ejecutar phpcs
-                    if vendor/bin/phpcs --standard=phpcs.xml "$TEMP_FILE" 2>/dev/null; then
-                        echo "✅ Bloque validado correctamente"
-                    else
-                        echo "❌ Error en la documentación del bloque"
-                        ERROR=1
-                        break 2  # Salir de ambos bucles si hay error
-                    fi
+        # Obtener las líneas modificadas
+        git diff -U0 $remote_commit $local_commit -- "$file" | grep -E '^@@' | while read -r hunk; do
+            if [[ $hunk =~ \+([0-9]+) ]]; then
+                modified_line="${BASH_REMATCH[1]}"
+                
+                # Validar la función que contiene la línea modificada
+                if ! validate_modified_function "$file" "$modified_line" "$content"; then
+                    ERROR=1
+                    echo "❌ Error encontrado en $file cerca de la línea $modified_line"
+                    exit 1
                 fi
             fi
-        done <<< "$DIFF_OUTPUT"
+        done
         
-        rm -f "$TEMP_FILE"
+        # Si hay error en el subshell, propagar
+        if [ $? -eq 1 ]; then
+            ERROR=1
+            break
+        fi
     fi
 done
 
+# Limpiar archivos temporales
+rm -rf "$TEMP_DIR"
+
+# Verificar si hubo errores
 if [ $ERROR -ne 0 ]; then
-    echo "❌ Se encontraron errores en la documentación PHPDoc. Por favor, corrige los problemas antes de hacer push."
+    echo "❌ Se encontraron errores en la documentación PHPDoc. Corrige los problemas antes de hacer push."
     exit 1
 fi
 
