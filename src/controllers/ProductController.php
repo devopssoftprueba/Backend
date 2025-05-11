@@ -52,7 +52,7 @@ class UserProfile
      *
      *
      *
-     *
+     * @return string $username variable donde está el nombre.
      */
     public function getUserName()
     {
