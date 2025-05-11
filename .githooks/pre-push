@@ -4,8 +4,12 @@
 # ───────────────────────────────────────────────
 echo "🔍 Ejecutando validación PHPDoc con PHPCS..."
 
-# Obtener archivos PHP modificados
-FILES=$(git diff --cached --name-only HEAD | grep -E '\.php$')
+# Obtener el hash del último commit local y remoto
+local_commit=$(git rev-parse HEAD)
+remote_commit=$(git rev-parse @{u} 2>/dev/null || echo "4b825dc642cb6eb9a060e54bf8d69288fbee4904")
+
+# Obtener archivos PHP modificados entre el commit remoto y local
+FILES=$(git diff --name-only $remote_commit $local_commit | grep -E '\.php$')
 
 # Si no hay archivos PHP modificados, no hacemos nada
 if [ -z "$FILES" ]; then
@@ -19,11 +23,14 @@ ERROR=0
 # Función para extraer el rango de líneas de una función/clase modificada
 get_modified_declarations() {
     local file=$1
+    local remote_commit=$2
+    local local_commit=$3
+
     # Obtener las líneas modificadas
-    local modified_lines=$(git diff --cached -U0 "$file" | grep "^+" | grep -v "^+++" | cut -c2-)
+    local modified_lines=$(git diff -U0 $remote_commit $local_commit -- "$file" | grep "^+" | grep -v "^+++" | cut -c2-)
 
     # Obtener el contenido actual del archivo
-    local content=$(cat "$file")
+    local content=$(git show $local_commit:"$file" 2>/dev/null)
 
     # Crear un archivo temporal para las declaraciones modificadas
     local temp_file=$(mktemp)
@@ -45,7 +52,7 @@ get_modified_declarations() {
 
             # Extraer la declaración
             echo "# Archivo: $file (líneas $start_line-$end_line)" >> "$context_file"
-            sed -n "${start_line},${end_line}p" "$file" >> "$temp_file"
+            echo "$content" | sed -n "${start_line},${end_line}p" >> "$temp_file"
             echo "" >> "$temp_file"
         fi
     done <<< "$modified_lines"
@@ -56,12 +63,12 @@ get_modified_declarations() {
 
 # Verificar cada archivo PHP modificado
 for FILE in $FILES; do
-    if [ -f "$FILE" ]; then
+    if git show $local_commit:"$FILE" > /dev/null 2>&1; then
         echo "📂 Validando $FILE ..."
         echo "───────────────────────────────────────────────"
 
         # Obtener las declaraciones modificadas y su contexto
-        TEMP_FILES=$(get_modified_declarations "$FILE")
+        TEMP_FILES=$(get_modified_declarations "$FILE" "$remote_commit" "$local_commit")
         TEMP_FILE=$(echo "$TEMP_FILES" | cut -d: -f1)
         CONTEXT_FILE=$(echo "$TEMP_FILES" | cut -d: -f2)
 
