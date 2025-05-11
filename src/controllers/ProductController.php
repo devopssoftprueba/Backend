@@ -57,7 +57,6 @@ class UserProfile
     public function getUserName()
     {
         return $this->userName;
-        $cambio1;
     }
 
     /**
