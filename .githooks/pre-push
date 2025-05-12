@@ -3,92 +3,27 @@
 set -e  # Salir inmediatamente si ocurre un error
 set -o pipefail  # Fallar si un comando dentro de un pipe falla
 
+# Configurar limpieza de archivos temporales al finalizar el script
+TEMP_DIR=$(mktemp -d)
+ERROR_FILE=$(mktemp)
+
+cleanup() {
+    rm -rf "$TEMP_DIR" "$ERROR_FILE"
+}
+trap cleanup EXIT
 
 # Continúa con la validación de PHPDoc
 echo "🔍 Iniciando validación PHPDoc con PHPCS..."
 echo "📅 Fecha: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
 echo "👤 Usuario: $(git config user.name)"
 
-# Crear un archivo temporal para almacenar el estado de error
-ERROR_FILE=$(mktemp)
-echo "0" > "$ERROR_FILE"
-
 # Obtener el hash del último commit local y remoto
+echo "🔍 Obteniendo commits locales y remotos..."
 local_commit=$(git rev-parse HEAD)
 remote_commit=$(git rev-parse @{u} 2>/dev/null || git hash-object -t tree /dev/null)
 
-# Crear directorio temporal
-TEMP_DIR=$(mktemp -d)
-
-# Función para encontrar el rango completo de una función
-find_function_range() {
-    local file=$1
-    local target_line=$2
-    local content=$3
-
-    # Buscar hacia arriba hasta encontrar el inicio de la función actual
-    local start_line=$target_line
-    while [ $start_line -gt 1 ]; do
-        local line=$(echo "$content" | sed "${start_line}q;d")
-        # Si encontramos el inicio de otra función, retrocedemos
-        if [ $start_line -lt $target_line ] && [[ $line =~ ^[[:space:]]*(public|private|protected|function)[[:space:]]+.*\( ]]; then
-            start_line=$((start_line + 1))
-            break
-        fi
-        # Si encontramos el inicio de la función actual o su docblock
-        if [[ $line =~ ^[[:space:]]*(public|private|protected|function)[[:space:]]+.*\( ]] || [[ $line =~ ^\s*(/\*\*) ]]; then
-            break
-        fi
-        start_line=$((start_line - 1))
-    done
-
-    # Si encontramos un docblock, asegurarnos de tener su inicio
-    if [[ $(echo "$content" | sed "${start_line}q;d") =~ ^\s*(/\*\*) ]]; then
-        while [ $start_line -gt 1 ]; do
-            local prev_line=$((start_line - 1))
-            local line=$(echo "$content" | sed "${prev_line}q;d")
-            if [[ ! $line =~ ^\s*(/\*\*|\*) ]]; then
-                break
-            fi
-            start_line=$prev_line
-        done
-    fi
-
-    # Buscar hacia abajo hasta encontrar el final de esta función específica
-    local end_line=$target_line
-    local brace_count=0
-    local found_function=false
-
-    while true; do
-        local line=$(echo "$content" | sed "${end_line}q;d")
-
-        if [[ $line =~ \{ ]]; then
-            brace_count=$((brace_count + 1))
-            found_function=true
-        fi
-        if [[ $line =~ \} ]]; then
-            brace_count=$((brace_count - 1))
-            if [ $found_function = true ] && [ $brace_count -eq 0 ]; then
-                break
-            fi
-        fi
-
-        # Si encontramos el inicio de la siguiente función, retrocedemos
-        if [ $end_line -gt $target_line ] && [[ $line =~ ^[[:space:]]*(public|private|protected|function)[[:space:]]+.*\( ]]; then
-            end_line=$((end_line - 1))
-            break
-        fi
-
-        end_line=$((end_line + 1))
-
-        # Evitar bucle infinito
-        if [ $end_line -gt 99999 ]; then
-            break
-        fi
-    done
-
-    echo "$start_line $end_line"
-}
+echo "🔍 Commit local: $local_commit"
+echo "🔍 Commit remoto: $remote_commit"
 
 # Función para validar una función específica
 validate_function() {
@@ -103,26 +38,9 @@ validate_function() {
     echo "<?php" > "$temp_file"
     echo "$content" | sed -n "${start_line},${end_line}p" >> "$temp_file"
 
-    echo "Validando función (líneas $start_line-$end_line):"
-    echo "───────────────────────────────────────────────"
-    cat "$temp_file"
-    echo "───────────────────────────────────────────────"
-
-    # Ejecutar phpcs aislado
+    echo "Validando función (líneas $start_line-$end_line)..."
     if ! phpcs_output=$(vendor/bin/phpcs --standard=phpcs.xml "$temp_file" 2>&1); then
-        # Ajustar los números de línea en la salida
-        while IFS= read -r line; do
-            if [[ $line =~ ^[[:space:]]*([0-9]+)[[:space:]]*\| ]]; then
-                # Calcular la línea real en el archivo original
-                reported_line="${BASH_REMATCH[1]}"
-                actual_line=$((reported_line + line_offset))
-                # Reemplazar el número de línea en la salida
-                echo "$line" | sed "s/^[[:space:]]*$reported_line[[:space:]]*|/Línea $actual_line:|/"
-            else
-                echo "$line"
-            fi
-        done <<< "$phpcs_output"
-
+        echo "$phpcs_output"
         echo "❌ Error de documentación en la función"
         echo "1" > "$ERROR_FILE"
         return 1
@@ -139,16 +57,11 @@ git diff --name-only $remote_commit $local_commit | grep -E '\.php$' | while rea
     fi
 
     echo "📂 Analizando $file..."
-
-    # Obtener contenido actual del archivo
     content=$(git show $local_commit:"$file")
 
-    # Obtener las líneas modificadas
     git diff -U0 $remote_commit $local_commit -- "$file" | grep -E '^@@' | while read -r hunk; do
         if [[ $hunk =~ \+([0-9]+)(,[0-9]+)? ]]; then
             modified_line=${BASH_REMATCH[1]}
-
-            # Encontrar el rango completo de la función
             range=$(find_function_range "$file" "$modified_line" "$content")
             start_line=$(echo $range | cut -d' ' -f1)
             end_line=$(echo $range | cut -d' ' -f2)
@@ -158,21 +71,10 @@ git diff --name-only $remote_commit $local_commit | grep -E '\.php$' | while rea
             fi
         fi
     done
-
-    # Verificar error en subshell
-    if [ $? -ne 0 ]; then
-        echo "1" > "$ERROR_FILE"
-        break
-    fi
 done
 
-# Leer estado de error
 ERROR=$(cat "$ERROR_FILE")
 
-# Limpiar archivos temporales
-rm -rf "$TEMP_DIR" "$ERROR_FILE"
-
-# Verificar si hubo errores
 if [ "$ERROR" -ne 0 ]; then
     echo "❌ Se encontraron errores en la documentación PHPDoc. Corrige los problemas antes de hacer push."
     exit 1
