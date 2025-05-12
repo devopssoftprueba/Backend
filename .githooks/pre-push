@@ -2,83 +2,161 @@
 
 set -o pipefail  # Fallar si un comando dentro de un pipe falla
 
-# Crear directorios temporales para almacenar errores y limpiar al terminar
-TEMP_DIR=$(mktemp -d)
+# Continúa con la validación de PHPDoc
+echo "🔍 Iniciando validación PHPDoc con PHPCS..."
+echo "📅 Fecha: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+echo "👤 Usuario: $(git config user.name)"
+
+# Crear un archivo temporal para almacenar el estado de error
 ERROR_FILE=$(mktemp)
-ERROR_OCCURRED=false
+echo "0" > "$ERROR_FILE"
 
-cleanup() {
-    echo "🧹 Limpiando archivos temporales..."
-    rm -rf "$TEMP_DIR" "$ERROR_FILE"
-}
-trap cleanup EXIT
-
-log_error() {
-    local message="$1"
-    echo "❌ [Error] $message" | tee -a "$ERROR_FILE"
-    ERROR_OCCURRED=true
-}
-
-# Comienzo de la validación
-echo "🔍 [Inicio] Iniciando validación PHPDoc con PHPCS..."
-echo "📅 [Fecha] $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
-echo "👤 [Usuario] $(git config user.name)"
+# Crear directorio temporal
+TEMP_DIR=$(mktemp -d)
 
 # Obtener el hash del último commit local y remoto
-echo "🔍 [Commits] Obteniendo commits locales y remotos..."
-local_commit=$(git rev-parse HEAD) || log_error "No se pudo obtener el commit local"
-remote_commit=$(git rev-parse @{u} 2>/dev/null || git hash-object -t tree /dev/null) || log_error "No se pudo obtener el commit remoto"
+local_commit=$(git rev-parse HEAD) || { echo "❌ Error: No se pudo obtener el commit local"; echo "1" > "$ERROR_FILE"; }
+remote_commit=$(git rev-parse @{u} 2>/dev/null || git hash-object -t tree /dev/null) || { echo "❌ Error: No se pudo obtener el commit remoto"; echo "1" > "$ERROR_FILE"; }
 
-echo "🔍 [Commits] Commit local: ${local_commit:-<no disponible>}"
-echo "🔍 [Commits] Commit remoto: ${remote_commit:-<no disponible>}"
-
-# Procesar archivos modificados
-echo "🔍 [Archivos] Analizando archivos modificados..."
-files=$(git diff --name-only "$remote_commit" "$local_commit" | grep -E '\.php$') || true
-
-if [ -z "$files" ]; then
-    echo "ℹ️ [Info] No se encontraron archivos PHP modificados. Saliendo del hook."
-    exit 0
-fi
-
-echo "🔍 [Archivos] Archivos encontrados:"
-echo "$files"
-
-# Procesar cada archivo PHP modificado
-echo "$files" | while read -r file; do
-    echo "📂 [Archivo] Procesando: $file"
-
-    if [ ! -f "$file" ]; then
-        echo "ℹ️ [Info] Archivo eliminado o no encontrado: $file. Ignorando..."
-        continue
-    fi
-
-    echo "🔍 [Contenido] Obteniendo contenido de $file..."
-    content=$(git show "$local_commit":"$file") || { log_error "No se pudo obtener contenido de $file"; continue; }
-    echo "✅ [Contenido] Contenido del archivo obtenido con éxito."
-
-    echo "🔍 [Líneas] Obteniendo líneas modificadas en $file..."
-    hunks=$(git diff -U0 "$remote_commit" "$local_commit" -- "$file" | grep -E '^@@') || { log_error "No se encontraron líneas modificadas en $file"; continue; }
-    echo "✅ [Líneas] Líneas modificadas obtenidas con éxito."
-
-    echo "🔍 [Hunks] Procesando líneas modificadas en $file..."
-    echo "$hunks" | while read -r hunk; do
-        if [[ $hunk =~ \+([0-9]+)(,[0-9]+)? ]]; then
-            modified_line=${BASH_REMATCH[1]}
-            echo "🔍 [Hunk] Analizando línea modificada: $modified_line en $file"
-        else
-            log_error "No se pudo analizar el hunk: $hunk en $file"
-        fi
-    done
-done
-
-# Verificar errores globales
-if [ "$ERROR_OCCURRED" = true ]; then
-    echo "❌ [Error Global] Se encontraron errores durante la ejecución del hook."
-    echo "ℹ️ [Detalles del Error]:"
-    cat "$ERROR_FILE"
+if [ "$(cat "$ERROR_FILE")" -ne 0 ]; then
+    echo "❌ Error al obtener los commits. Corrige el problema antes de hacer push."
     exit 1
 fi
 
-echo "✅ [Éxito] Validación completada. Continuando con el push."
+# Función para encontrar el rango completo de una función
+find_function_range() {
+    local file=$1
+    local target_line=$2
+    local content=$3
+
+    echo "🔍 Buscando rango de la función en $file, línea objetivo: $target_line"
+
+    local start_line=$target_line
+    while [ $start_line -gt 1 ]; do
+        local line=$(echo "$content" | sed "${start_line}q;d")
+        if [ $start_line -lt $target_line ] && [[ $line =~ ^[[:space:]]*(public|private|protected|function)[[:space:]]+.*\( ]]; then
+            start_line=$((start_line + 1))
+            break
+        fi
+        if [[ $line =~ ^[[:space:]]*(public|private|protected|function)[[:space:]]+.*\( ]] || [[ $line =~ ^\s*(/\*\*) ]]; then
+            break
+        fi
+        start_line=$((start_line - 1))
+    done
+
+    if [[ $(echo "$content" | sed "${start_line}q;d") =~ ^\s*(/\*\*) ]]; then
+        while [ $start_line -gt 1 ]; do
+            local prev_line=$((start_line - 1))
+            local line=$(echo "$content" | sed "${prev_line}q;d")
+            if [[ ! $line =~ ^\s*(/\*\*|\*) ]]; then
+                break
+            fi
+            start_line=$prev_line
+        done
+    fi
+
+    local end_line=$target_line
+    local brace_count=0
+    local found_function=false
+
+    while true; do
+        local line=$(echo "$content" | sed "${end_line}q;d")
+        if [[ $line =~ \{ ]]; then
+            brace_count=$((brace_count + 1))
+            found_function=true
+        fi
+        if [[ $line =~ \} ]]; then
+            brace_count=$((brace_count - 1))
+            if [ $found_function = true ] && [ $brace_count -eq 0 ]; then
+                break
+            fi
+        fi
+        if [ $end_line -gt $target_line ] && [[ $line =~ ^[[:space:]]*(public|private|protected|function)[[:space:]]+.*\( ]]; then
+            end_line=$((end_line - 1))
+            break
+        fi
+        end_line=$((end_line + 1))
+        if [ $end_line -gt 99999 ]; then
+            break
+        fi
+    done
+
+    echo "$start_line $end_line"
+}
+
+# Función para validar una función específica
+validate_function() {
+    local file=$1
+    local start_line=$2
+    local end_line=$3
+    local content=$4
+    local temp_file="${TEMP_DIR}/temp.php"
+    local line_offset=$((start_line - 2))
+
+    echo "<?php" > "$temp_file"
+    echo "$content" | sed -n "${start_line},${end_line}p" >> "$temp_file"
+
+    echo "📋 Validando función (líneas $start_line-$end_line):"
+    echo "───────────────────────────────────────────────"
+    cat "$temp_file"
+    echo "───────────────────────────────────────────────"
+
+    if ! phpcs_output=$(api/vendor/bin/phpcs --standard=api/phpcs.xml "$temp_file" 2>&1); then
+        while IFS= read -r line; do
+            if [[ $line =~ ^[[:space:]]*([0-9]+)[[:space:]]*\| ]]; then
+                reported_line="${BASH_REMATCH[1]}"
+                actual_line=$((reported_line + line_offset))
+                echo "$line" | sed "s/^[[:space:]]*$reported_line[[:space:]]*|/Línea $actual_line:|/"
+            else
+                echo "$line"
+            fi
+        done <<< "$phpcs_output"
+
+        echo "❌ Error de documentación en la función"
+        echo "1" > "$ERROR_FILE"
+        return 1
+    fi
+
+    return 0
+}
+
+# Procesar archivos modificados
+git diff --name-only "$remote_commit" "$local_commit" | grep -E '\.php$' | while read -r file; do
+    if [ ! -f "$file" ]; then
+        echo "ℹ️ Archivo eliminado o no encontrado: $file. Ignorando..."
+        continue
+    fi
+
+    echo "📂 Analizando $file..."
+
+    content=$(git show "$local_commit":"$file") || { echo "❌ Error al obtener contenido de $file"; echo "1" > "$ERROR_FILE"; continue; }
+
+    git diff -U0 "$remote_commit" "$local_commit" -- "$file" | grep -E '^@@' | while read -r hunk; do
+        if [[ $hunk =~ \+([0-9]+)(,[0-9]+)? ]]; then
+            modified_line=${BASH_REMATCH[1]}
+            range=$(find_function_range "$file" "$modified_line" "$content")
+            start_line=$(echo "$range" | cut -d' ' -f1)
+            end_line=$(echo "$range" | cut -d' ' -f2)
+
+            if ! validate_function "$file" "$start_line" "$end_line" "$content"; then
+                exit 1
+            fi
+        fi
+    done
+
+    if [ "$(cat "$ERROR_FILE")" -ne 0 ]; then
+        break
+    fi
+done
+
+ERROR=$(cat "$ERROR_FILE")
+
+rm -rf "$TEMP_DIR" "$ERROR_FILE"
+
+if [ "$ERROR" -ne 0 ]; then
+    echo "❌ Se encontraron errores en la documentación PHPDoc. Corrige los problemas antes de hacer push."
+    exit 1
+fi
+
+echo "✅ Validación exitosa. Continuando con el push."
 exit 0
