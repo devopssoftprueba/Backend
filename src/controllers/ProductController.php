@@ -47,14 +47,7 @@ class UserProfile
         return $this->userName;
     }
 
-    /**
-     *
-     *
-     *
-     *
-     *
-     *
-     */
+
     public function setUserAge(int $userAge)
     {
         $this->userAge = $userAge;
