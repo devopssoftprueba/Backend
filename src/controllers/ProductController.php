@@ -50,6 +50,8 @@ class UserProfile
     /**
      * Establece la edad del usuario.
      *
+     * Este metodo asigna la edad del usuario. La edad debe ser un valor entero que represente la edad actual
+     * del usuario en años.
      *
      *
      *
