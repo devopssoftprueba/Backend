@@ -53,7 +53,7 @@ class UserProfile
      *
      *
      *
-     * @return void
+     *
      */
     public function setUserAge(int $userAge)
     {
