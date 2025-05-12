@@ -56,7 +56,7 @@ class UserProfile
     /**
      * Obtiene la edad del usuario.
      *
-     * Este metodo devuelve la edad almacenada del usuario.
+     *
      *
      * @return integer Edad del usuario.
      */
