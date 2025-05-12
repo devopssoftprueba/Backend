@@ -25,8 +25,6 @@ class UserProfile
     /**
      * Establece el nombre del usuario.
      *
-     * Este metodo asigna el valor proporcionado al nombre del usuario. El valor de `$userName` es una cadena de texto
-     * que representa el nombre completo del usuario.
      *
      * @param string $userName Nombre del usuario.
      *
