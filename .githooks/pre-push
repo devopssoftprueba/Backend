@@ -109,7 +109,7 @@ validate_function() {
     echo "───────────────────────────────────────────────"
 
     # Ejecutar phpcs aislado
-    if ! phpcs_output=$(api/vendor/bin/phpcs --standard=api/phpcs.xml "$temp_file" 2>&1); then
+    if ! phpcs_output=$(vendor/bin/phpcs --standard=phpcs.xml "$temp_file" 2>&1); then
         # Ajustar los números de línea en la salida
         while IFS= read -r line; do
             if [[ $line =~ ^[[:space:]]*([0-9]+)[[:space:]]*\| ]]; then
