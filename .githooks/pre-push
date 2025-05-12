@@ -1,17 +1,23 @@
 #!/bin/bash
 
-set -e  # Salir inmediatamente si ocurre un error
 set -o pipefail  # Fallar si un comando dentro de un pipe falla
 
 # Crear directorios temporales para almacenar errores y limpiar al terminar
 TEMP_DIR=$(mktemp -d)
 ERROR_FILE=$(mktemp)
+ERROR_OCCURRED=false
 
 cleanup() {
     echo "🧹 Limpiando archivos temporales..."
     rm -rf "$TEMP_DIR" "$ERROR_FILE"
 }
 trap cleanup EXIT
+
+log_error() {
+    local message="$1"
+    echo "❌ [Error] $message" | tee -a "$ERROR_FILE"
+    ERROR_OCCURRED=true
+}
 
 # Comienzo de la validación
 echo "🔍 [Inicio] Iniciando validación PHPDoc con PHPCS..."
@@ -20,111 +26,26 @@ echo "👤 [Usuario] $(git config user.name)"
 
 # Obtener el hash del último commit local y remoto
 echo "🔍 [Commits] Obteniendo commits locales y remotos..."
-local_commit=$(git rev-parse HEAD) || { echo "❌ [Error] No se pudo obtener el commit local"; exit 1; }
-remote_commit=$(git rev-parse @{u} 2>/dev/null || git hash-object -t tree /dev/null) || { echo "❌ [Error] No se pudo obtener el commit remoto"; exit 1; }
+local_commit=$(git rev-parse HEAD) || log_error "No se pudo obtener el commit local"
+remote_commit=$(git rev-parse @{u} 2>/dev/null || git hash-object -t tree /dev/null) || log_error "No se pudo obtener el commit remoto"
 
-echo "🔍 [Commits] Commit local: $local_commit"
-echo "🔍 [Commits] Commit remoto: $remote_commit"
-
-# Función para encontrar el rango de una función
-find_function_range() {
-    local file=$1
-    local target_line=$2
-    local content=$3
-
-    echo "🔎 [Función] Buscando rango en $file, línea objetivo: $target_line"
-
-    # Buscar hacia arriba hasta encontrar el inicio de la función actual
-    local start_line=$target_line
-    while [ $start_line -gt 1 ]; do
-        local line=$(echo "$content" | sed "${start_line}q;d")
-        if [ $start_line -lt $target_line ] && [[ $line =~ ^[[:space:]]*(public|private|protected|function)[[:space:]]+.*\( ]]; then
-            start_line=$((start_line + 1))
-            break
-        fi
-        if [[ $line =~ ^[[:space:]]*(public|private|protected|function)[[:space:]]+.*\( ]] || [[ $line =~ ^\s*(/\*\*) ]]; then
-            break
-        fi
-        start_line=$((start_line - 1))
-    done
-
-    # Si encontramos un docblock, asegurarnos de incluir su inicio
-    if [[ $(echo "$content" | sed "${start_line}q;d") =~ ^\s*(/\*\*) ]]; then
-        while [ $start_line -gt 1 ]; do
-            local prev_line=$((start_line - 1))
-            local line=$(echo "$content" | sed "${prev_line}q;d")
-            if [[ ! $line =~ ^\s*(/\*\*|\*) ]]; then
-                break
-            fi
-            start_line=$prev_line
-        done
-    fi
-
-    # Buscar hacia abajo hasta encontrar el final de la función
-    local end_line=$target_line
-    local brace_count=0
-    local found_function=false
-
-    while true; do
-        local line=$(echo "$content" | sed "${end_line}q;d")
-        if [[ $line =~ \{ ]]; then
-            brace_count=$((brace_count + 1))
-            found_function=true
-        fi
-        if [[ $line =~ \} ]]; then
-            brace_count=$((brace_count - 1))
-            if [ $found_function = true ] && [ $brace_count -eq 0 ]; then
-                break
-            fi
-        fi
-        if [ $end_line -gt $target_line ] && [[ $line =~ ^[[:space:]]*(public|private|protected|function)[[:space:]]+.*\( ]]; then
-            end_line=$((end_line - 1))
-            break
-        fi
-        end_line=$((end_line + 1))
-        if [ $end_line -gt 99999 ]; then
-            echo "❌ [Error] Rango de búsqueda excedió los límites en $file"
-            exit 1
-        fi
-    done
-
-    echo "$start_line $end_line"
-}
-
-# Validar una función específica
-validate_function() {
-    local file=$1
-    local start_line=$2
-    local end_line=$3
-    local content=$4
-    local temp_file="${TEMP_DIR}/temp.php"
-    local line_offset=$((start_line - 2))  # -2 por el <?php y la función
-
-    echo "📋 [Validación] Validando función en $file (líneas $start_line-$end_line)"
-
-    # Crear archivo temporal con solo la función a validar
-    echo "<?php" > "$temp_file"
-    echo "$content" | sed -n "${start_line},${end_line}p" >> "$temp_file"
-
-    echo "───────────────────────────────────────────────"
-    cat "$temp_file"
-    echo "───────────────────────────────────────────────"
-
-    # Ejecutar PHPCS
-    if ! phpcs_output=$(vendor/bin/phpcs --standard=phpcs.xml "$temp_file" 2>&1); then
-        echo "❌ [PHP_CodeSniffer] Errores detectados:"
-        echo "$phpcs_output"
-        echo "1" > "$ERROR_FILE"
-        return 1
-    fi
-
-    echo "✅ [Validación] Función validada correctamente."
-    return 0
-}
+echo "🔍 [Commits] Commit local: ${local_commit:-<no disponible>}"
+echo "🔍 [Commits] Commit remoto: ${remote_commit:-<no disponible>}"
 
 # Procesar archivos modificados
 echo "🔍 [Archivos] Analizando archivos modificados..."
-git diff --name-only $remote_commit $local_commit | grep -E '\.php$' | while read -r file; do
+files=$(git diff --name-only "$remote_commit" "$local_commit" | grep -E '\.php$') || true
+
+if [ -z "$files" ]; then
+    echo "ℹ️ [Info] No se encontraron archivos PHP modificados. Saliendo del hook."
+    exit 0
+fi
+
+echo "🔍 [Archivos] Archivos encontrados:"
+echo "$files"
+
+# Procesar cada archivo PHP modificado
+echo "$files" | while read -r file; do
     echo "📂 [Archivo] Procesando: $file"
 
     if [ ! -f "$file" ]; then
@@ -133,19 +54,29 @@ git diff --name-only $remote_commit $local_commit | grep -E '\.php$' | while rea
     fi
 
     echo "🔍 [Contenido] Obteniendo contenido de $file..."
-    content=$(git show $local_commit:"$file") || { echo "❌ [Error] No se pudo obtener contenido de $file"; exit 1; }
+    content=$(git show "$local_commit":"$file") || { log_error "No se pudo obtener contenido de $file"; continue; }
     echo "✅ [Contenido] Contenido del archivo obtenido con éxito."
 
     echo "🔍 [Líneas] Obteniendo líneas modificadas en $file..."
-    git diff -U0 $remote_commit $local_commit -- "$file" | grep -E '^@@' || { echo "❌ [Error] No se encontraron líneas modificadas en $file"; exit 1; }
+    hunks=$(git diff -U0 "$remote_commit" "$local_commit" -- "$file" | grep -E '^@@') || { log_error "No se encontraron líneas modificadas en $file"; continue; }
     echo "✅ [Líneas] Líneas modificadas obtenidas con éxito."
+
+    echo "🔍 [Hunks] Procesando líneas modificadas en $file..."
+    echo "$hunks" | while read -r hunk; do
+        if [[ $hunk =~ \+([0-9]+)(,[0-9]+)? ]]; then
+            modified_line=${BASH_REMATCH[1]}
+            echo "🔍 [Hunk] Analizando línea modificada: $modified_line en $file"
+        else
+            log_error "No se pudo analizar el hunk: $hunk en $file"
+        fi
+    done
 done
 
 # Verificar errores globales
-ERROR=$(cat "$ERROR_FILE")
-
-if [ "$ERROR" -ne 0 ]; then
-    echo "❌ [Error Global] Se encontraron errores en la documentación PHPDoc. Corrige los problemas antes de hacer push."
+if [ "$ERROR_OCCURRED" = true ]; then
+    echo "❌ [Error Global] Se encontraron errores durante la ejecución del hook."
+    echo "ℹ️ [Detalles del Error]:"
+    cat "$ERROR_FILE"
     exit 1
 fi
 
