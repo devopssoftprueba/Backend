@@ -53,7 +53,7 @@ class UserProfile
      * Este metodo asigna la edad del usuario. La edad debe ser un valor entero que represente la edad actual
      * del usuario en años.
      *
-     * @param int $userAge Edad del usuario.
+     *
      *
      * @return void
      */
@@ -74,7 +74,7 @@ class UserProfile
         return $this->userAge;
     }
     /**
-     * Metodo de prueba que simula una operación con try-catch.
+     * Metodo de prueba.php que simula una operación con try-catch.
      *
      * Este metodo solo sirve para verificar que el try-catch cumple con las reglas del validador.
      *

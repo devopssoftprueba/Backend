@@ -5,14 +5,14 @@ namespace App\Models;
 class Prueba
 {
     /**
-     * Identificador de prueba
+     * Identificador de prueba.php
      *
      * @var integer
      */
     private int $id;
 
     /**
-     * Obtener el ID de prueba
+     * Obtener el ID de prueba.php
      *
      * @return integer
      */
