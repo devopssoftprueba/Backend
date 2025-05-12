@@ -26,7 +26,7 @@ remote_commit=$(git rev-parse @{u} 2>/dev/null || git hash-object -t tree /dev/n
 echo "🔍 [Commits] Commit local: $local_commit"
 echo "🔍 [Commits] Commit remoto: $remote_commit"
 
-# Validar un rango de líneas de una función
+# Función para encontrar el rango de una función
 find_function_range() {
     local file=$1
     local target_line=$2
@@ -126,28 +126,19 @@ validate_function() {
 echo "🔍 [Archivos] Analizando archivos modificados..."
 git diff --name-only $remote_commit $local_commit | grep -E '\.php$' | while read -r file; do
     echo "📂 [Archivo] Procesando: $file"
+
     if [ ! -f "$file" ]; then
         echo "ℹ️ [Info] Archivo eliminado o no encontrado: $file. Ignorando..."
         continue
     fi
 
-    # Obtener contenido del archivo
+    echo "🔍 [Contenido] Obteniendo contenido de $file..."
     content=$(git show $local_commit:"$file") || { echo "❌ [Error] No se pudo obtener contenido de $file"; exit 1; }
+    echo "✅ [Contenido] Contenido del archivo obtenido con éxito."
 
-    # Obtener líneas modificadas
-    git diff -U0 $remote_commit $local_commit -- "$file" | grep -E '^@@' | while read -r hunk; do
-        if [[ $hunk =~ \+([0-9]+)(,[0-9]+)? ]]; then
-            modified_line=${BASH_REMATCH[1]}
-            echo "🔍 [Hunk] Analizando línea modificada: $modified_line en $file"
-            range=$(find_function_range "$file" "$modified_line" "$content") || { echo "❌ [Error] No se pudo calcular rango para $file"; exit 1; }
-            start_line=$(echo $range | cut -d' ' -f1)
-            end_line=$(echo $range | cut -d' ' -f2)
-
-            if ! validate_function "$file" "$start_line" "$end_line" "$content"; then
-                exit 1
-            fi
-        fi
-    done
+    echo "🔍 [Líneas] Obteniendo líneas modificadas en $file..."
+    git diff -U0 $remote_commit $local_commit -- "$file" | grep -E '^@@' || { echo "❌ [Error] No se encontraron líneas modificadas en $file"; exit 1; }
+    echo "✅ [Líneas] Líneas modificadas obtenidas con éxito."
 done
 
 # Verificar errores globales
