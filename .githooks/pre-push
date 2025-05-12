@@ -8,6 +8,7 @@ TEMP_DIR=$(mktemp -d)
 ERROR_FILE=$(mktemp)
 
 cleanup() {
+    echo "🧹 Limpiando archivos temporales..."
     rm -rf "$TEMP_DIR" "$ERROR_FILE"
 }
 trap cleanup EXIT
@@ -19,8 +20,8 @@ echo "👤 Usuario: $(git config user.name)"
 
 # Obtener el hash del último commit local y remoto
 echo "🔍 Obteniendo commits locales y remotos..."
-local_commit=$(git rev-parse HEAD)
-remote_commit=$(git rev-parse @{u} 2>/dev/null || git hash-object -t tree /dev/null)
+local_commit=$(git rev-parse HEAD) || { echo "❌ Error obteniendo el commit local"; exit 1; }
+remote_commit=$(git rev-parse @{u} 2>/dev/null || git hash-object -t tree /dev/null) || { echo "❌ Error obteniendo el commit remoto"; exit 1; }
 
 echo "🔍 Commit local: $local_commit"
 echo "🔍 Commit remoto: $remote_commit"
@@ -30,6 +31,8 @@ find_function_range() {
     local file=$1
     local target_line=$2
     local content=$3
+
+    echo "🔎 Buscando rango de la función en el archivo: $file, línea objetivo: $target_line"
 
     # Buscar hacia arriba hasta encontrar el inicio de la función actual
     local start_line=$target_line
@@ -80,7 +83,8 @@ find_function_range() {
         fi
         end_line=$((end_line + 1))
         if [ $end_line -gt 99999 ]; then
-            break
+            echo "❌ Error: Búsqueda de rango excedió los límites en el archivo $file"
+            exit 1
         fi
     done
 
@@ -96,37 +100,30 @@ validate_function() {
     local temp_file="${TEMP_DIR}/temp.php"
     local line_offset=$((start_line - 2))  # -2 por el <?php y la función
 
+    echo "📋 Validando función en líneas $start_line-$end_line del archivo $file"
+
     # Crear archivo temporal con solo la función a validar
     echo "<?php" > "$temp_file"
     echo "$content" | sed -n "${start_line},${end_line}p" >> "$temp_file"
 
-    echo "Validando función (líneas $start_line-$end_line):"
     echo "───────────────────────────────────────────────"
     cat "$temp_file"
     echo "───────────────────────────────────────────────"
 
     # Ejecutar phpcs aislado
     if ! phpcs_output=$(vendor/bin/phpcs --standard=phpcs.xml "$temp_file" 2>&1); then
-        # Ajustar los números de línea en la salida
-        while IFS= read -r line; do
-            if [[ $line =~ ^[[:space:]]*([0-9]+)[[:space:]]*\| ]]; then
-                reported_line="${BASH_REMATCH[1]}"
-                actual_line=$((reported_line + line_offset))
-                echo "$line" | sed "s/^[[:space:]]*$reported_line[[:space:]]*|/Línea $actual_line:|/"
-            else
-                echo "$line"
-            fi
-        done <<< "$phpcs_output"
-
-        echo "❌ Error de documentación en la función"
+        echo "❌ Errores detectados por PHP_CodeSniffer:"
+        echo "$phpcs_output"
         echo "1" > "$ERROR_FILE"
         return 1
     fi
 
+    echo "✅ Función validada correctamente."
     return 0
 }
 
 # Procesar archivos modificados
+echo "🔍 Obteniendo archivos modificados..."
 git diff --name-only $remote_commit $local_commit | grep -E '\.php$' | while read -r file; do
     echo "📂 Procesando archivo: $file"
     if [ ! -f "$file" ]; then
