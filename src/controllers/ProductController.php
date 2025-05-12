@@ -1,16 +1,6 @@
 <?php
 
 /**
- * Clase que representa el perfil de un usuario.
- *
- * Esta clase contiene las propiedades relacionadas con el perfil de un usuario, como su nombre y su edad.
- * Además, proporciona métodos para establecer y obtener estos valores.
- *
- * @category UserManagement
- * @package  UserProfilePackage
- * @author   Tu Nombre
- * @version  1.0.0
- * @since    2025-04-15
  */
 class UserProfile
 {
