@@ -28,7 +28,7 @@ class UserProfile
      *
      * Esta propiedad almacena la edad del usuario. Es utilizada para determinar la edad del usuario en el sistema.
      *
-     * @var integer $userAge Variable con la edad del usuario.
+     * @var integer $userAge Variable con la edad del usuario dgdf.
      */
     private $userAge;
 
