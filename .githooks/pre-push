@@ -3,9 +3,9 @@
 set -o pipefail  # Fallar si un comando dentro de un pipe falla
 
 # Continúa con la validación de PHPDoc
-echo "🔍 Iniciando validación PHPDoc con PHPCS..."
-echo "📅 Fecha: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
-echo "👤 Usuario: $(git config user.name)"
+echo "[Inicio] Iniciando validación PHPDoc con PHPCS..."
+echo "[Fecha] $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+echo "[Usuario] $(git config user.name)"
 
 # Crear un archivo temporal para almacenar el estado de error
 ERROR_FILE=$(mktemp)
@@ -15,11 +15,11 @@ echo "0" > "$ERROR_FILE"
 TEMP_DIR=$(mktemp -d)
 
 # Obtener el hash del último commit local y remoto
-local_commit=$(git rev-parse HEAD) || { echo "❌ Error: No se pudo obtener el commit local"; echo "1" > "$ERROR_FILE"; }
-remote_commit=$(git rev-parse @{u} 2>/dev/null || git hash-object -t tree /dev/null) || { echo "❌ Error: No se pudo obtener el commit remoto"; echo "1" > "$ERROR_FILE"; }
+local_commit=$(git rev-parse HEAD) || { echo "[Error] No se pudo obtener el commit local"; echo "1" > "$ERROR_FILE"; }
+remote_commit=$(git rev-parse @{u} 2>/dev/null || git hash-object -t tree /dev/null) || { echo "[Error] No se pudo obtener el commit remoto"; echo "1" > "$ERROR_FILE"; }
 
 if [ "$(cat "$ERROR_FILE")" -ne 0 ]; then
-    echo "❌ Error al obtener los commits. Corrige el problema antes de hacer push."
+    echo "[Error] Error al obtener los commits. Corrige el problema antes de hacer push."
     exit 1
 fi
 
@@ -29,7 +29,7 @@ find_function_range() {
     local target_line=$2
     local content=$3
 
-    echo "🔍 Buscando rango de la función en $file, línea objetivo: $target_line"
+    echo "[Función] Buscando rango en $file, línea objetivo: $target_line"
 
     local start_line=$target_line
     while [ $start_line -gt 1 ]; do
@@ -96,10 +96,10 @@ validate_function() {
     echo "<?php" > "$temp_file"
     echo "$content" | sed -n "${start_line},${end_line}p" >> "$temp_file"
 
-    echo "📋 Validando función (líneas $start_line-$end_line):"
-    echo "───────────────────────────────────────────────"
+    echo "[Validación] Validando función (líneas $start_line-$end_line):"
+    echo "-----------------------------------------------"
     cat "$temp_file"
-    echo "───────────────────────────────────────────────"
+    echo "-----------------------------------------------"
 
     if ! phpcs_output=$(api/vendor/bin/phpcs --standard=api/phpcs.xml "$temp_file" 2>&1); then
         while IFS= read -r line; do
@@ -123,13 +123,13 @@ validate_function() {
 # Procesar archivos modificados
 git diff --name-only "$remote_commit" "$local_commit" | grep -E '\.php$' | while read -r file; do
     if [ ! -f "$file" ]; then
-        echo "ℹ️ Archivo eliminado o no encontrado: $file. Ignorando..."
+        echo "[Info] Archivo eliminado o no encontrado: $file. Ignorando..."
         continue
     fi
 
-    echo "📂 Analizando $file..."
+    echo "[Archivo] Analizando $file..."
 
-    content=$(git show "$local_commit":"$file") || { echo "❌ Error al obtener contenido de $file"; echo "1" > "$ERROR_FILE"; continue; }
+    content=$(git show "$local_commit":"$file") || { echo "[Error] Error al obtener contenido de $file"; echo "1" > "$ERROR_FILE"; continue; }
 
     git diff -U0 "$remote_commit" "$local_commit" -- "$file" | grep -E '^@@' | while read -r hunk; do
         if [[ $hunk =~ \+([0-9]+)(,[0-9]+)? ]]; then
