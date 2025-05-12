@@ -3,11 +3,6 @@
 set -e  # Salir inmediatamente si ocurre un error
 set -o pipefail  # Fallar si un comando dentro de un pipe falla
 
-# Verificar si el script es ejecutado correctamente
-if [[ -z "$GIT_DIR" ]]; then
-    echo "Error: Este script debe ejecutarse como un hook de Git."
-    exit 1
-fi
 
 # Continúa con la validación de PHPDoc
 echo "🔍 Iniciando validación PHPDoc con PHPCS..."
