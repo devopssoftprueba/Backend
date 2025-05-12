@@ -1,5 +1,14 @@
 #!/bin/bash
 
+set -e  # Salir inmediatamente si ocurre un error
+set -o pipefail  # Fallar si un comando dentro de un pipe falla
+
+# Verificar si el script es ejecutado correctamente
+if [[ -z "$GIT_DIR" ]]; then
+    echo "Error: Este script debe ejecutarse como un hook de Git."
+    exit 1
+fi
+
 # Continúa con la validación de PHPDoc
 echo "🔍 Iniciando validación PHPDoc con PHPCS..."
 echo "📅 Fecha: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
@@ -105,7 +114,7 @@ validate_function() {
     echo "───────────────────────────────────────────────"
 
     # Ejecutar phpcs aislado
-    if ! phpcs_output=$(vendor/bin/phpcs --standard=phpcs.xml "$temp_file" 2>&1); then
+    if ! phpcs_output=$(api/vendor/bin/phpcs --standard=api/phpcs.xml "$temp_file" 2>&1); then
         # Ajustar los números de línea en la salida
         while IFS= read -r line; do
             if [[ $line =~ ^[[:space:]]*([0-9]+)[[:space:]]*\| ]]; then
