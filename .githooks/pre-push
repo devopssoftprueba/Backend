@@ -1,7 +1,6 @@
 #!/bin/bash
-# ───────────────────────────────────────────────
-# 📄 VALIDACIÓN DE DOCUMENTACIÓN PHPDOC
-# ───────────────────────────────────────────────
+
+# Continúa con la validación de PHPDoc
 echo "🔍 Iniciando validación PHPDoc con PHPCS..."
 echo "📅 Fecha: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
 echo "👤 Usuario: $(git config user.name)"
@@ -130,33 +129,36 @@ validate_function() {
 
 # Procesar archivos modificados
 git diff --name-only $remote_commit $local_commit | grep -E '\.php$' | while read -r file; do
-    if [ -f "$file" ]; then
-        echo "📂 Analizando $file..."
-        
-        # Obtener contenido actual del archivo
-        content=$(git show $local_commit:"$file")
-        
-        # Obtener las líneas modificadas
-        git diff -U0 $remote_commit $local_commit -- "$file" | grep -E '^@@' | while read -r hunk; do
-            if [[ $hunk =~ \+([0-9]+)(,[0-9]+)? ]]; then
-                modified_line=${BASH_REMATCH[1]}
-                
-                # Encontrar el rango completo de la función
-                range=$(find_function_range "$file" "$modified_line" "$content")
-                start_line=$(echo $range | cut -d' ' -f1)
-                end_line=$(echo $range | cut -d' ' -f2)
-                
-                if ! validate_function "$file" "$start_line" "$end_line" "$content"; then
-                    exit 1
-                fi
+    if [ ! -f "$file" ]; then
+        echo "ℹ️ Archivo eliminado o no encontrado: $file. Ignorando..."
+        continue
+    fi
+
+    echo "📂 Analizando $file..."
+    
+    # Obtener contenido actual del archivo
+    content=$(git show $local_commit:"$file")
+    
+    # Obtener las líneas modificadas
+    git diff -U0 $remote_commit $local_commit -- "$file" | grep -E '^@@' | while read -r hunk; do
+        if [[ $hunk =~ \+([0-9]+)(,[0-9]+)? ]]; then
+            modified_line=${BASH_REMATCH[1]}
+            
+            # Encontrar el rango completo de la función
+            range=$(find_function_range "$file" "$modified_line" "$content")
+            start_line=$(echo $range | cut -d' ' -f1)
+            end_line=$(echo $range | cut -d' ' -f2)
+            
+            if ! validate_function "$file" "$start_line" "$end_line" "$content"; then
+                exit 1
             fi
-        done
-        
-        # Verificar error en subshell
-        if [ $? -ne 0 ]; then
-            echo "1" > "$ERROR_FILE"
-            break
         fi
+    done
+    
+    # Verificar error en subshell
+    if [ $? -ne 0 ]; then
+        echo "1" > "$ERROR_FILE"
+        break
     fi
 done
 
