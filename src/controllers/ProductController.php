@@ -65,7 +65,7 @@ class UserProfile
     /**
      * Metodo de prueba.php que simula una operación con try-catch.
      *
-     * Este metodo solo sirve para verificar que el try-catch cumple con las reglas del validador.
+     *
      *
      * @return void
      */
