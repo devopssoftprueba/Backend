@@ -3,20 +3,13 @@
     "description": "Repositorio con validación PHPDoc automática usando PHPCS",
     "type": "project",
     "require-dev": {
-        "squizlabs/php_codesniffer": "^3.12",
+        "squizlabs/php_codesniffer": "^3.13",
         "phpcompatibility/php-compatibility": "^9.3"
     },
     "config": {
         "platform": {
             "php": "8.2.12"
         }
-    },"scripts": {
-    "post-install-cmd": [
-        "@php -r \"if (!is_dir('.githooks')) { echo '⚠️  No se encontró la carpeta .githooks. ¿Estás en un repositorio Git?\\n'; exit(1); } if (!copy('.githookspre-push', '.githooks/pre-push')) { echo '❌ No se pudo copiar el hook pre-push.\\n'; exit(1); } echo '✅ Hook pre-push instalado correctamente.\\n'; chmod('.githooks/pre-push', 0755);\""
-    ],
-    "post-update-cmd": [
-        "@php -r \"if (!is_dir('.githooks')) { echo '⚠️  No se encontró la carpeta .githooks. ¿Estás en un repositorio Git?\\n'; exit(1); } if (!copy('.githookspre-push', '.githooks/pre-push')) { echo '❌ No se pudo copiar el hook pre-push.\\n'; exit(1); } echo '✅ Hook pre-push actualizado correctamente.\\n'; chmod('.githooks/pre-push', 0755);\""
-    ]
 },
     "require": {
         "php": "^8.2",
