@@ -41,11 +41,11 @@ class Producto_invalido
      * @param float   $precio_producto Precio del producto.
      */
     public function __construct(
-        int $producto_id,
+
         string $nombre_producto,
         float $precio_producto
     ) {
-        $this->producto_id     = $producto_id;
+
         $this->nombre_producto = $nombre_producto;
         $this->precio_producto = $precio_producto;
     }
