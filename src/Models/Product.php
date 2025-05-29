@@ -57,6 +57,6 @@ class Producto_invalido
      */
     public function obtener_datos_del_producto()
     {
-        return [ 'producto_id' => $this->producto_id, 'nombre_producto' => $this->nombre_producto, 'precio_producto' => $this->precio_producto, 'descripcion_extensa_con_mucho_texto_para_validar_que_no_explota_con_lineas_largas_1234567890_ABCDEFGHIJKLMN_opqrstuvwxyz' => 'Ejemplo de descripción muy extensa que excede cualquier límite razonable de longitud para una línea, ideal para prueba de reglas de longitud' ];
+        return [ 'producto_id' => $this->producto_id, 'name_product' => $this->nombre_producto, 'precio_producto' => $this->precio_producto, 'descripcion_extensa_con_mucho_texto_para_validar_que_no_explota_con_lineas_largas_1234567890_ABCDEFGHIJKLMN_opqrstuvwxyz' => 'Ejemplo de descripción muy extensa que excede cualquier límite razonable de longitud para una línea, ideal para prueba de reglas de longitud' ];
     }
 }
