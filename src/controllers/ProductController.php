@@ -104,4 +104,11 @@ class UserProfile
         }
     }
 
+    /**
+     * Este metodo hace algo
+     */
+    public function testMethod($param) {
+        return $param;
+    }
+
 }
