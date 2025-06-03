@@ -1,9 +1,18 @@
 # Ignorar archivos de Composer
 /vendor/
+/api/vendor/
 
-.idea
+# IDE
+.idea/
+
+# Archivos de configuración
 composer.lock
+
+
+# Directorios del sistema
 /var/
 /logs/
+
+# Archivos del sistema
 .DS_Store    # Para MacOS
 Thumbs.db    # Para Windows

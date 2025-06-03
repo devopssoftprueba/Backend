@@ -1,0 +1,30 @@
+{
+    "name": "devopssoftprueba/backend",
+    "description": "Backend API project",
+    "type": "project",
+    "require": {
+        "php": "^8.2",
+        "ext-pdo": "*",
+        "ext-json": "*"
+    },
+    "require-dev": {
+        "phpcompatibility/php-compatibility": "^9.3",
+        "squizlabs/php_codesniffer": "^3.13"
+    },
+    "config": {
+        "platform": {
+            "php": "8.2.12"
+        },
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "scripts": {
+        "check-style": "phpcs -p --standard=phpcs.xml",
+        "fix-style": "phpcbf -p --standard=phpcs.xml"
+    }
+}
