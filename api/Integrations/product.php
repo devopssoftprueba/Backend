@@ -42,7 +42,7 @@ class PaymentGateway
     /**
      *
      *
-     * @param string $currency Código de moneda.
+     * @param string
      * @return array Respuesta del procesamiento.
      */
     public function processPayment($currency): array
