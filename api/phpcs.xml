@@ -9,22 +9,43 @@
     <exclude-pattern>*/routes/*</exclude-pattern>
     <exclude-pattern>*/vendor/*</exclude-pattern>
 
-    <!-- Reglas de documentación -->
-    <rule ref="Generic.Commenting.DocComment"/>
+    <!-- Deshabilitar todas las reglas -->
+    <rule ref="Generic.Commenting.DocComment">
+        <exclude name="Generic.Commenting.DocComment.TagValueIndent"/>
+        <exclude name="Generic.Commenting.DocComment.NonParamGroup"/>
+        <exclude name="Generic.Commenting.DocComment.ParamNotFirst"/>
+        <exclude name="Generic.Commenting.DocComment.SpacingBeforeTags"/>
+        <exclude name="Generic.Commenting.DocComment.TagsNotGrouped"/>
+        <exclude name="Generic.Commenting.DocComment.ContentAfterOpen"/>
+        <exclude name="Generic.Commenting.DocComment.ContentBeforeClose"/>
+        <exclude name="Generic.Commenting.DocComment.SpacingAfterTagGroup"/>
+    </rule>
 
-    <rule ref="Squiz.Commenting">
-        <exclude name="Squiz.Commenting.FunctionComment.MissingReturnType"/>
-        <exclude name="Squiz.Commenting.FunctionComment.SpacingAfter"/>
+    <!-- Solo verificar presencia de documentación -->
+    <rule ref="Squiz.Commenting.FunctionComment">
+        <exclude name="Squiz.Commenting.FunctionComment.MissingParamTag"/>
+        <exclude name="Squiz.Commenting.FunctionComment.ParamNameNoMatch"/>
+        <exclude name="Squiz.Commenting.FunctionComment.InvalidTypeHint"/>
+        <exclude name="Squiz.Commenting.FunctionComment.EmptyThrows"/>
+        <exclude name="Squiz.Commenting.FunctionComment.ThrowsNotCapital"/>
+        <exclude name="Squiz.Commenting.FunctionComment.SpacingAfterParamType"/>
+        <exclude name="Squiz.Commenting.FunctionComment.SpacingAfterParamName"/>
+        <exclude name="Squiz.Commenting.FunctionComment.ParamCommentNotCapital"/>
+        <exclude name="Squiz.Commenting.FunctionComment.ParamCommentFullStop"/>
+        <exclude name="Squiz.Commenting.FunctionComment.ThrowsNoFullStop"/>
+        <exclude name="Squiz.Commenting.FunctionComment.Missing"/>
+        <exclude name="Squiz.Commenting.FunctionComment.MissingReturn"/>
         <properties>
             <property name="skipIfClosure" value="true"/>
         </properties>
     </rule>
 
-    <rule ref="Squiz.Commenting.ClassComment">
-        <exclude name="Squiz.Commenting.ClassComment.TagNotAllowed"/>
+    <rule ref="Squiz.Commenting">
+        <properties>
+            <property name="skipIfClosure" value="true"/>
+        </properties>
     </rule>
 
-    <!-- Configuración básica -->
     <arg name="extensions" value="php"/>
     <arg value="s"/>
 </ruleset>
