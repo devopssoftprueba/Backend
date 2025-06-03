@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * Archivo de ejemplo para funciones anónimas
+ */
 // Ejemplo 1: Función anónima con array_map
 $numeros = [1, 2, 3, 4, 5];
 $duplicados = array_map(function($numero) {

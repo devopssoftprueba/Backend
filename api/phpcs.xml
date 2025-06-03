@@ -1,48 +1,47 @@
 <?xml version="1.0"?>
 <ruleset name="DocStandard">
-    <description>Reglas de documentación integraciones</description>
+    <description>Reglas documentación phpdocs</description>
 
-    <!-- Excluir carpetas -->
-    <exclude-pattern>*/tests/*</exclude-pattern>
-    <exclude-pattern>*/database/*</exclude-pattern>
-    <exclude-pattern>*/config/*</exclude-pattern>
-    <exclude-pattern>*/routes/*</exclude-pattern>
-    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <!-- Excluir carpetas que no necesitan validación -->
+    <exclude-pattern>*/tests/*</exclude-pattern>      <!-- Ignora archivos en carpeta tests -->
+    <exclude-pattern>*/database/*</exclude-pattern>   <!-- Ignora archivos en carpeta database -->
+    <exclude-pattern>*/config/*</exclude-pattern>     <!-- Ignora archivos en carpeta config -->
+    <exclude-pattern>*/routes/*</exclude-pattern>     <!-- Ignora archivos en carpeta routes -->
+    <exclude-pattern>*/vendor/*</exclude-pattern>     <!-- Ignora archivos en carpeta vendor -->
 
-    <!-- Reglas de documentación -->
-    <rule ref="Generic.Commenting.DocComment" />
-
-    <!-- Reglas para documentación de funciones -->
-    <rule ref="Squiz.Commenting.FunctionComment">
-        <exclude name="Squiz.Commenting.FunctionComment.MissingParamType" />
-        <exclude name="Squiz.Commenting.FunctionComment.MissingReturnType" />
-        <exclude name="Squiz.Commenting.FunctionComment.IncorrectParamVarName" />
-        <exclude name="Squiz.Commenting.FunctionComment.ScalarTypeHintMissing" />
-        <exclude name="Squiz.Commenting.FunctionComment.TypeHintMissing" />
+    <!-- Desactiva TODAS las reglas por defecto -->
+    <rule ref="Generic">
+        <exclude name="Generic"/>                     <!-- Excluye todas las reglas Generic -->
+    </rule>
+    <rule ref="PSR2">
+        <exclude name="PSR2"/>                        <!-- Excluye todas las reglas PSR2 -->
+    </rule>
+    <rule ref="Squiz">
+        <exclude name="Squiz"/>                       <!-- Excluye todas las reglas Squiz -->
     </rule>
 
-    <!-- Reglas para documentación de clases -->
-    <rule ref="Squiz.Commenting.ClassComment">
-        <exclude name="Squiz.Commenting.ClassComment.TagNotAllowed" />
+    <!-- Activa solo regla básica de documentación -->
+    <rule ref="Generic.Commenting.DocComment"/>       <!-- Valida formato básico de DocBlocks -->
+
+    <!-- Configuración específica para documentación de funciones -->
+    <rule ref="Squiz.Commenting.FunctionComment">     <!-- Reglas para documentación de funciones -->
+
+        <!-- No requiere tipos en @return -->
+        <exclude name="Squiz.Commenting.FunctionComment.MissingReturnType"/>
+        <!-- No valida espacios después de la función -->
+        <exclude name="Squiz.Commenting.FunctionComment.SpacingAfter"/>
+
+        <properties>
+            <property name="skipIfClosure" value="true"/>  <!-- Ignora funciones anónimas -->
+        </properties>
     </rule>
 
-    <!-- Reglas para documentación de variables -->
-    <rule ref="Squiz.Commenting.VariableComment">
-        <exclude name="Squiz.Commenting.VariableComment.MissingVar" />
-        <exclude name="Squiz.Commenting.VariableComment.Missing" />
-        <exclude name="Squiz.Commenting.VariableComment.MissingParamName" />
-        <exclude name="Squiz.Commenting.VariableComment.MissingParamComment" />
-        <exclude name="Squiz.Commenting.VariableComment.ParamNameNoMatch" />
+    <!-- Configuración para documentación de clases -->
+    <rule ref="Squiz.Commenting.ClassComment">       <!-- Reglas para documentación de clases -->
+        <exclude name="Squiz.Commenting.ClassComment.TagNotAllowed"/>  <!-- Permite tags personalizados -->
     </rule>
 
-    <!-- Ignorar warnings de longitud de línea -->
-    <rule ref="Generic.Files.LineLength">
-        <severity>0</severity>
-    </rule>
-
-    <!-- Configuración general -->
-    <arg name="basepath" value="." />
-    <config name="php_version" value="80200" />
-    <arg name="extensions" value="php" />
-    <ini name="memory_limit" value="128M" />
+    <!-- Configuración general de PHPCS -->
+    <arg name="basepath" value="."/>                <!-- Define directorio base -->
+    <arg name="extensions" value="php"/>            <!-- Solo analiza archivos .php -->
 </ruleset>
