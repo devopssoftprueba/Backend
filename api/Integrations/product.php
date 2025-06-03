@@ -40,11 +40,10 @@ class PaymentGateway
     /**
      * Procesa un pago
      *
-     * @param float $amount Monto a procesar
      * @param string $currency Código de moneda
      * @return array Respuesta del procesamiento
      */
-    public function processPayment( $currency): array
+    public function processPayment($amonunt, $currency): array
     {
         return [
             'success' => true,
