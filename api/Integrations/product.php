@@ -31,7 +31,7 @@ class PaymentGateway
      * Constructor de la clase PaymentGateway.
      *
      * @param string $apiToken Token de autenticación.
-     * @param string $baseUrl URL base de la API.
+     * @param string $baseUrl  URL base de la API.
      */
     public function __construct($apiToken,$baseUrl)
     {
