@@ -7,8 +7,8 @@ namespace App\Integrations;
  *
  * Gestiona las integraciones con pasarelas de pago.
  *
- * @package App\Integrations.
- * @author  Ronald Pérez.
+ * @package App\Integrations
+ * @author  Ronald pelaez.
  * @version 1.0.0.
  */
 class PaymentGateway
