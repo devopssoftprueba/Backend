@@ -1,19 +1,19 @@
 <?xml version="1.0"?>
 <ruleset name="DocStandard">
-    <description>
-        reglas de la documentacion ignorando errores del codigo.
-    </description>
+    <description>Reglas de documentación integraciones</description>
 
-    <!-- Excluir vendor -->
+    <!-- Excluir carpetas -->
+    <exclude-pattern>*/tests/*</exclude-pattern>
+    <exclude-pattern>*/database/*</exclude-pattern>
+    <exclude-pattern>*/config/*</exclude-pattern>
+    <exclude-pattern>*/routes/*</exclude-pattern>
     <exclude-pattern>*/vendor/*</exclude-pattern>
 
-
-    <!-- Valida los bloques generales de PHPDoc -->
+    <!-- Reglas de documentación -->
     <rule ref="Generic.Commenting.DocComment" />
 
-    <!-- Valida la documentación de funciones -->
+    <!-- Reglas para documentación de funciones -->
     <rule ref="Squiz.Commenting.FunctionComment">
-        <!-- No forzar tipos si no se utilizan -->
         <exclude name="Squiz.Commenting.FunctionComment.MissingParamType" />
         <exclude name="Squiz.Commenting.FunctionComment.MissingReturnType" />
         <exclude name="Squiz.Commenting.FunctionComment.IncorrectParamVarName" />
@@ -21,19 +21,23 @@
         <exclude name="Squiz.Commenting.FunctionComment.TypeHintMissing" />
     </rule>
 
-    <!-- Valida la documentación en clases -->
+    <!-- Reglas para documentación de clases -->
     <rule ref="Squiz.Commenting.ClassComment">
-        <!-- Permitir etiquetas personalizadas como @category, @package, etc. -->
         <exclude name="Squiz.Commenting.ClassComment.TagNotAllowed" />
     </rule>
 
-    <!-- Valida la documentación de variables -->
+    <!-- Reglas para documentación de variables -->
     <rule ref="Squiz.Commenting.VariableComment">
         <exclude name="Squiz.Commenting.VariableComment.MissingVar" />
         <exclude name="Squiz.Commenting.VariableComment.Missing" />
         <exclude name="Squiz.Commenting.VariableComment.MissingParamName" />
         <exclude name="Squiz.Commenting.VariableComment.MissingParamComment" />
         <exclude name="Squiz.Commenting.VariableComment.ParamNameNoMatch" />
+    </rule>
+
+    <!-- Ignorar warnings de longitud de línea -->
+    <rule ref="Generic.Files.LineLength">
+        <severity>0</severity>
     </rule>
 
     <!-- Configuración general -->
