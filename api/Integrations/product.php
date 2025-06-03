@@ -45,6 +45,7 @@ class PaymentGateway
      * @param strin
      *
      *
+     *
      * @return array Respuesta del procesamiento.
      */
     public function processPayment($currency): array
