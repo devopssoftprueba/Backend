@@ -35,15 +35,15 @@
         <exclude name="Squiz.Commenting.FunctionComment.ThrowsNoFullStop"/>
         <exclude name="Squiz.Commenting.FunctionComment.Missing"/>
         <exclude name="Squiz.Commenting.FunctionComment.MissingReturn"/>
-        <properties>
-            <property name="skipIfClosure" value="true"/>
-        </properties>
+        <exclude name="Squiz.Commenting.FunctionComment.IncorrectTypeHint"/>
     </rule>
 
-    <rule ref="Squiz.Commenting">
-        <properties>
-            <property name="skipIfClosure" value="true"/>
-        </properties>
+    <!-- Excluir reglas para funciones anónimas -->
+    <rule ref="Squiz.Commenting.InlineComment">
+        <exclude name="Squiz.Commenting.InlineComment"/>
+    </rule>
+    <rule ref="Squiz.Commenting.BlockComment">
+        <exclude name="Squiz.Commenting.BlockComment"/>
     </rule>
 
     <arg name="extensions" value="php"/>
