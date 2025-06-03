@@ -24,11 +24,7 @@
         <exclude name="Squiz.Commenting.ClassComment.TagNotAllowed"/>
     </rule>
 
-    <!-- Configuración de salida -->
+    <!-- Configuración básica -->
     <arg name="extensions" value="php"/>
-    <arg value="sp"/>
-    <arg name="report" value="full"/>
-    <arg name="colors" value="0"/>
-    <arg name="tab-width" value="4"/>
-    <arg name="encoding" value="utf-8"/>
+    <arg value="s"/>
 </ruleset>
