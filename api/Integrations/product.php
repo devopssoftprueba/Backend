@@ -51,6 +51,8 @@ class PaymentGateway
             'currency' => $currency,
 
 
+
+
             'transaction_id' => uniqid('trans_')
         ];
     }
