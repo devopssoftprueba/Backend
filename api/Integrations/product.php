@@ -3,33 +3,33 @@
 namespace App\Integrations;
 
 /**
- * Clase PaymentGateway
+ * Clase PaymentGateway.
  *
- * Gestiona las integraciones con pasarelas de pago
+ * Gestiona las integraciones con pasarelas de pago.
  *
- * @package App\Integrations
- * @author Ronald Pérez
- * @version 1.0.0
+ * @package App\Integrations.
+ * @author  Ronald Pérez.
+ * @version 1.0.0.
  */
 class PaymentGateway
 {
     /**
-     * Token de autenticación para la pasarela de pago
-     * @var string
+     * Token de autenticación para la pasarela de pago.
+     * @var string.
      */
     private $apiToken;
 
     /**
-     * URL base para las peticiones a la API
-     * @var string
+     * URL base para las peticiones a la API.
+     * @var string.
      */
     private $baseUrl;
 
     /**
-     * Constructor de la clase PaymentGateway
+     * Constructor de la clase PaymentGateway.
      *
-     * @param string $apiToken Token de autenticación
-     * @param string $baseUrl URL base de la API
+     * @param string $apiToken Token de autenticación.
+     * @param string $baseUrl URL base de la API.
      */
     public function __construct($apiToken,$baseUrl)
     {
@@ -40,9 +40,9 @@ class PaymentGateway
     /**
      * Procesa un pago
      *
-     * @param string $currency Código de moneda
+     * @param string $currency Código de moneda.
      *
-     * @return array Respuesta del procesamiento
+     * @return array Respuesta del procesamiento.
      */
     public function processPayment($currency): array
     {
