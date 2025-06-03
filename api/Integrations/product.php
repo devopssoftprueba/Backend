@@ -40,7 +40,6 @@ class PaymentGateway
     /**
      * Procesa un pago
      *
-     * @param float $amount Monto a procesar
      * @param string $currency Código de moneda
      * @return array Respuesta del procesamiento
      */
