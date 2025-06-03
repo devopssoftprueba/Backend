@@ -12,15 +12,12 @@
     <!-- Reglas de documentación -->
     <rule ref="Generic.Commenting.DocComment"/>
 
-    <rule ref="Squiz.Commenting.FunctionCommentThrowTag">
+    <rule ref="Squiz.Commenting">
+        <exclude name="Squiz.Commenting.FunctionComment.MissingReturnType"/>
+        <exclude name="Squiz.Commenting.FunctionComment.SpacingAfter"/>
         <properties>
             <property name="skipIfClosure" value="true"/>
         </properties>
-    </rule>
-
-    <rule ref="Squiz.Commenting.FunctionComment">
-        <exclude name="Squiz.Commenting.FunctionComment.MissingReturnType"/>
-        <exclude name="Squiz.Commenting.FunctionComment.SpacingAfter"/>
     </rule>
 
     <rule ref="Squiz.Commenting.ClassComment">
@@ -28,10 +25,10 @@
     </rule>
 
     <!-- Configuración de salida -->
-    <arg name="basepath" value="."/>
     <arg name="extensions" value="php"/>
-    <arg value="s"/>
-    <arg name="report-width" value="120"/>
+    <arg value="sp"/>
     <arg name="report" value="full"/>
-    <arg value="np"/>
+    <arg name="colors" value="0"/>
+    <arg name="tab-width" value="4"/>
+    <arg name="encoding" value="utf-8"/>
 </ruleset>
