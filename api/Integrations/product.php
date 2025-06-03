@@ -44,11 +44,11 @@ class PaymentGateway
      * @param string $currency Código de moneda
      * @return array Respuesta del procesamiento
      */
-    public function processPayment($amount, $currency): array
+    public function processPayment( $currency): array
     {
         return [
             'success' => true,
-            'amount' => $amount,
+
             'currency' => $currency,
             'transaction_id' => uniqid('trans_')
         ];
