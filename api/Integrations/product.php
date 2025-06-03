@@ -15,12 +15,14 @@ class PaymentGateway
 {
     /**
      * Token de autenticación para la pasarela de pago.
+     *
      * @var string.
      */
     private $apiToken;
 
     /**
      * URL base para las peticiones a la API.
+     *
      * @var string.
      */
     private $baseUrl;
