@@ -12,28 +12,26 @@
     <!-- Reglas de documentación -->
     <rule ref="Generic.Commenting.DocComment"/>
 
-    <rule ref="Squiz.Commenting.FunctionComment">
-        <exclude name="Squiz.Commenting.FunctionComment.MissingReturnType"/>
-        <exclude name="Squiz.Commenting.FunctionComment.SpacingAfter"/>
+    <rule ref="Squiz.Commenting.FunctionCommentThrowTag">
         <properties>
             <property name="skipIfClosure" value="true"/>
         </properties>
+    </rule>
+
+    <rule ref="Squiz.Commenting.FunctionComment">
+        <exclude name="Squiz.Commenting.FunctionComment.MissingReturnType"/>
+        <exclude name="Squiz.Commenting.FunctionComment.SpacingAfter"/>
     </rule>
 
     <rule ref="Squiz.Commenting.ClassComment">
         <exclude name="Squiz.Commenting.ClassComment.TagNotAllowed"/>
     </rule>
 
-    <!-- Configuración general -->
-    <arg name="basepath" value="."/>
-    <arg name="extensions" value="php"/>
-
     <!-- Configuración de salida -->
     <arg name="basepath" value="."/>
     <arg name="extensions" value="php"/>
-    <arg value="s"/>                  <!-- Muestra los sniffs -->
+    <arg value="s"/>
     <arg name="report-width" value="120"/>
-    <arg name="report" value="full"/> <!-- Formato de reporte completo -->
-    <arg value="np"/>                <!-- n: no colores, p: muestra progreso -->
-
+    <arg name="report" value="full"/>
+    <arg value="np"/>
 </ruleset>
