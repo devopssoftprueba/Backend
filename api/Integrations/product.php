@@ -31,7 +31,7 @@ class PaymentGateway
      * @param string $apiToken Token de autenticación
      * @param string $baseUrl URL base de la API
      */
-    public function __construct(string $apiToken, string $baseUrl)
+    public function __construct($apiToken,$baseUrl)
     {
         $this->apiToken = $apiToken;
         $this->baseUrl = $baseUrl;
@@ -44,7 +44,7 @@ class PaymentGateway
      * @param string $currency Código de moneda
      * @return array Respuesta del procesamiento
      */
-    public function processPayment(float $amount, string $currency): array
+    public function processPayment($amount, $currency): array
     {
         return [
             'success' => true,
