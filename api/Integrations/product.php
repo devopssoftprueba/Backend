@@ -48,7 +48,6 @@ class PaymentGateway
     {
         return [
             'success' => true,
-
             'currency' => $currency,
             'transaction_id' => uniqid('trans_')
         ];
