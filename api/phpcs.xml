@@ -36,6 +36,8 @@
         <exclude name="Squiz.Commenting.FunctionComment.Missing"/>
         <exclude name="Squiz.Commenting.FunctionComment.MissingReturn"/>
         <exclude name="Squiz.Commenting.FunctionComment.IncorrectTypeHint"/>
+        <exclude name="Squiz.Commenting.FunctionComment.ScalarTypeHintMissing"/>
+        <exclude name="Squiz.Commenting.FunctionComment.TypeHintMissing"/>
     </rule>
 
     <!-- Excluir reglas para funciones anónimas -->
