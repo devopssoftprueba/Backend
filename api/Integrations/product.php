@@ -43,9 +43,7 @@ class PaymentGateway
      *
      *
      * @param strin
-     *
-     *
-     *
+
      *
      * @return array Respuesta del procesamiento.
      */
