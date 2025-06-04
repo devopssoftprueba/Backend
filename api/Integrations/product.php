@@ -42,7 +42,7 @@ class PaymentGateway
     /**
      * Procesa la respuesta de pago.
      *
-     * @param strin $currency Moneda del pago.
+
      *
      * @return array Respuesta del procesamiento.
      */
