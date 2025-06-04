@@ -32,7 +32,7 @@ $suma = array_reduce($numeros, function($acumulador, $valor) {
 }, 0);
 
 // Ejemplo 6: Función anónima como callback de ordenamiento
-$frutas = ['manzana', 'pera', 'banana'];
+$frutas = ['manzana verde', 'pera', 'banana'];
 usort($frutas, function($a, $b) {
     return strlen($a) - strlen($b);
 });
