@@ -21,7 +21,7 @@ class PaymentGateway
     private $apiToken;
 
     /**
-     * URL base para las peticiones a la API.
+
      *
      * @var string.
      */
