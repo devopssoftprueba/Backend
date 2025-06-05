@@ -27,9 +27,8 @@
         <exclude name="Generic.Files.LineLength"/>
     </rule>
 
-    <!-- Solo verificar presencia de documentación -->
+    <!-- Verificar documentación -->
     <rule ref="Squiz.Commenting.FunctionComment">
-        <exclude name="Squiz.Commenting.FunctionComment.MissingParamTag"/>
         <exclude name="Squiz.Commenting.FunctionComment.ParamNameNoMatch"/>
         <exclude name="Squiz.Commenting.FunctionComment.InvalidTypeHint"/>
         <exclude name="Squiz.Commenting.FunctionComment.EmptyThrows"/>
@@ -40,10 +39,9 @@
         <exclude name="Squiz.Commenting.FunctionComment.ParamCommentFullStop"/>
         <exclude name="Squiz.Commenting.FunctionComment.ThrowsNoFullStop"/>
         <exclude name="Squiz.Commenting.FunctionComment.Missing"/>
-        <exclude name="Squiz.Commenting.FunctionComment.MissingReturn"/>
-        <exclude name="Squiz.Commenting.FunctionComment.IncorrectTypeHint"/>
         <exclude name="Squiz.Commenting.FunctionComment.ScalarTypeHintMissing"/>
         <exclude name="Squiz.Commenting.FunctionComment.TypeHintMissing"/>
+        <exclude name="Squiz.Commenting.FunctionComment.IncorrectTypeHint"/>
         <exclude name="Squiz.Commenting.FunctionComment.LongNotCapital"/>
     </rule>
 
