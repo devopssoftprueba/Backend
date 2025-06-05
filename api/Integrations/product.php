@@ -59,6 +59,7 @@ class PaymentGateway
      *
      * @param string $transactionId     Identificador único de la transacción que se utilizará para rastrear todo el proceso de pago a través de los diferentes sistemas y proveedores involucrados en el procesamiento de la transacción
      * @param float  $amount            Monto total de la transacción que será procesada, incluyendo todos los impuestos aplicables y las tarifas de procesamiento correspondientes al método de pago seleccionado
+     *
      * @return array Retorna un array asociativo con toda la información detallada del resultado del procesamiento de la transacción, incluyendo el estado final, códigos de autorización, referencias de pago y cualquier mensaje relevante del procesador
      * @throws PaymentProcessingException Cuando ocurre un error durante el procesamiento de la transacción o si alguna de las validaciones de seguridad no se cumple satisfactoriamente
      */
