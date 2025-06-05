@@ -3,10 +3,6 @@
     <description>Reglas documentación phpdocs</description>
 
     <!-- Excluir carpetas -->
-    <exclude-pattern>*/tests/*</exclude-pattern>
-    <exclude-pattern>*/database/*</exclude-pattern>
-    <exclude-pattern>*/config/*</exclude-pattern>
-    <exclude-pattern>*/routes/*</exclude-pattern>
     <exclude-pattern>*/vendor/*</exclude-pattern>
 
     <!-- Deshabilitar todas las reglas -->
