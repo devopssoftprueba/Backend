@@ -63,7 +63,7 @@ class PaymentGateway
      * @return array Retorna un array asociativo con toda la información detallada del resultado del procesamiento de la transacción, incluyendo el estado final, códigos de autorización, referencias de pago y cualquier mensaje relevante del procesador
      * @throws PaymentProcessingException Cuando ocurre un error durante el procesamiento de la transacción o si alguna de las validaciones de seguridad no se cumple satisfactoriamente
      */
-    public function processComplexPayment(   $amount, $paymentMethodCode): array
+    public function processComplexPayment( $transactionId,  $amount, $paymentMethodCode): array
     {
         // Implementación del método
         return [];
