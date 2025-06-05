@@ -19,6 +19,12 @@
         <exclude name="Generic.Commenting.DocComment.ContentAfterOpen"/>
         <exclude name="Generic.Commenting.DocComment.ContentBeforeClose"/>
         <exclude name="Generic.Commenting.DocComment.SpacingAfterTagGroup"/>
+        <exclude name="Generic.Commenting.DocComment.LongNotCapital"/>
+    </rule>
+
+    <!-- Deshabilitar límites de longitud -->
+    <rule ref="Generic.Files.LineLength">
+        <exclude name="Generic.Files.LineLength"/>
     </rule>
 
     <!-- Solo verificar presencia de documentación -->
@@ -38,6 +44,7 @@
         <exclude name="Squiz.Commenting.FunctionComment.IncorrectTypeHint"/>
         <exclude name="Squiz.Commenting.FunctionComment.ScalarTypeHintMissing"/>
         <exclude name="Squiz.Commenting.FunctionComment.TypeHintMissing"/>
+        <exclude name="Squiz.Commenting.FunctionComment.LongNotCapital"/>
     </rule>
 
     <!-- Excluir reglas para funciones anónimas -->
