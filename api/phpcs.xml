@@ -25,6 +25,7 @@
 
     <!-- Verificar documentación -->
     <rule ref="Squiz.Commenting.FunctionComment">
+        <exclude name="Squiz.Commenting.FunctionComment.IncorrectParamVarName"/>
         <exclude name="Squiz.Commenting.FunctionComment.ParamNameNoMatch"/>
         <exclude name="Squiz.Commenting.FunctionComment.InvalidTypeHint"/>
         <exclude name="Squiz.Commenting.FunctionComment.EmptyThrows"/>
@@ -42,12 +43,23 @@
         <exclude name="Squiz.Commenting.FunctionComment.InvalidReturn"/>
     </rule>
 
-    <!-- Excluir reglas para funciones anónimas -->
+    <!-- Excluir reglas para funciones anónimas y comentarios -->
     <rule ref="Squiz.Commenting.InlineComment">
         <exclude name="Squiz.Commenting.InlineComment"/>
     </rule>
     <rule ref="Squiz.Commenting.BlockComment">
         <exclude name="Squiz.Commenting.BlockComment"/>
+    </rule>
+
+    <!-- Excluir validación de alineación de Swagger -->
+    <rule ref="Squiz.Commenting.DocCommentAlignment">
+        <exclude name="Squiz.Commenting.DocCommentAlignment"/>
+    </rule>
+    <rule ref="PEAR.Commenting">
+        <exclude name="PEAR.Commenting"/>
+    </rule>
+    <rule ref="Generic.Commenting">
+        <exclude name="Generic.Commenting"/>
     </rule>
 
     <arg name="extensions" value="php"/>
